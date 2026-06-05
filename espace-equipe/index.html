@@ -33,16 +33,24 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 const SUPABASE_URL = 'https://hzploaweyewjyxdhpmvo.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_NfYsr2yMHIYRJ6F3H96EXg_KWZE4_RQ';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let client;
+try {
+  client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e) {
+  console.error('Supabase init error:', e);
+}
 
 // Vérifier si déjà connecté
-supabase.auth.getSession().then(({ data }) => {
-  if (data.session) window.location.href = 'dashboard.html';
-});
+if (client) {
+  client.auth.getSession().then(({ data }) => {
+    if (data.session) window.location.href = 'dashboard.html';
+  });
+}
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -52,17 +60,34 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   btn.disabled = true;
   err.classList.remove('show');
 
-  const email = document.getElementById('email').value;
+  const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error) {
+  if (!client) {
+    err.textContent = 'Erreur de connexion au serveur. Rechargez la page.';
     err.classList.add('show');
     btn.textContent = 'Se connecter';
     btn.disabled = false;
-  } else {
-    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  try {
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      err.textContent = 'Email ou mot de passe incorrect.';
+      err.classList.add('show');
+      btn.textContent = 'Se connecter';
+      btn.disabled = false;
+    } else {
+      btn.textContent = 'Connecté ✓';
+      window.location.href = 'dashboard.html';
+    }
+  } catch(e) {
+    err.textContent = 'Erreur réseau. Vérifiez votre connexion.';
+    err.classList.add('show');
+    btn.textContent = 'Se connecter';
+    btn.disabled = false;
   }
 });
 </script>
