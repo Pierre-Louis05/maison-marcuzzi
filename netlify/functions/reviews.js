@@ -35,14 +35,16 @@ exports.handler = async (event, context) => {
 
     const place = data.places[0];
 
-    // Formater les avis
-    const reviews = (place.reviews || []).map(r => ({
-      nom: r.authorAttribution?.displayName || 'Anonyme',
-      avatar: r.authorAttribution?.photoUri || null,
-      note: r.rating || 5,
-      texte: r.text?.text || '',
-      date: r.relativePublishTimeDescription || ''
-    }));
+    // Formater et filtrer uniquement les avis 5 étoiles avec un texte
+    const reviews = (place.reviews || [])
+      .filter(r => r.rating === 5 && r.text?.text && r.text.text.trim().length > 20)
+      .map(r => ({
+        nom: r.authorAttribution?.displayName || 'Anonyme',
+        avatar: r.authorAttribution?.photoUri || null,
+        note: r.rating || 5,
+        texte: r.text?.text || '',
+        date: r.relativePublishTimeDescription || ''
+      }));
 
     return {
       statusCode: 200,
