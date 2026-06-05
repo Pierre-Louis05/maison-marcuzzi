@@ -319,10 +319,46 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="nav.js"></script>
 <script>
-function handleSubmit(e) {
+const SUPABASE_URL = 'https://hzploaweyewjyxdhpmvo.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_NfYsr2yMHIYRJ6F3H96EXg_KWZE4_RQ';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function handleSubmit(e) {
   e.preventDefault();
+
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.textContent = 'Envoi en cours…';
+  btn.disabled = true;
+
+  // Récupérer les univers cochés
+  const univers = Array.from(document.querySelectorAll('input[name="univers"]:checked')).map(cb => cb.value);
+
+  const data = {
+    client_prenom: document.getElementById('prenom').value.trim(),
+    client_nom: document.getElementById('nom').value.trim(),
+    client_email: document.getElementById('email').value.trim(),
+    client_tel: document.getElementById('tel').value.trim(),
+    univers: univers.length > 0 ? univers : ['Non précisé'],
+    avancement: document.getElementById('avancement').value,
+    date_souhaitee: document.getElementById('date').value || null,
+    creneau: document.getElementById('creneau').value || null,
+    description: document.getElementById('message').value.trim() || null,
+    status: 'nouveau'
+  };
+
+  const { error } = await supabase.from('rdv_requests').insert([data]);
+
+  if (error) {
+    alert('Une erreur est survenue. Veuillez réessayer ou nous appeler au 03 28 48 08 08.');
+    btn.textContent = 'Envoyer ma demande →';
+    btn.disabled = false;
+    return;
+  }
+
+  // Afficher confirmation
   document.querySelector('.rdv-form form').style.display = 'none';
   document.querySelector('.step-indicator').style.display = 'none';
   document.querySelector('h3').style.display = 'none';
