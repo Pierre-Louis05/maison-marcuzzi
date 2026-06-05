@@ -319,12 +319,11 @@
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="nav.js"></script>
 <script>
+// Utilise fetch direct sans SDK Supabase pour éviter tout conflit auth
 const SUPABASE_URL = 'https://hzploaweyewjyxdhpmvo.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_NfYsr2yMHIYRJ6F3H96EXg_KWZE4_RQ';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function handleSubmit(e) {
   e.preventDefault();
@@ -333,7 +332,6 @@ async function handleSubmit(e) {
   btn.textContent = 'Envoi en cours…';
   btn.disabled = true;
 
-  // Récupérer les univers cochés
   const univers = Array.from(document.querySelectorAll('input[name="univers"]:checked')).map(cb => cb.value);
 
   const data = {
@@ -349,20 +347,31 @@ async function handleSubmit(e) {
     status: 'nouveau'
   };
 
-  const { error } = await supabase.from('rdv_requests').insert([data]);
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rdv_requests`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(data)
+    });
 
-  if (error) {
+    if (!res.ok) throw new Error('Erreur serveur');
+
+    // Afficher confirmation
+    document.querySelector('.rdv-form form').style.display = 'none';
+    document.querySelector('.step-indicator').style.display = 'none';
+    document.querySelector('h3').style.display = 'none';
+    document.getElementById('confirmation').style.display = 'block';
+
+  } catch(err) {
     alert('Une erreur est survenue. Veuillez réessayer ou nous appeler au 03 28 48 08 08.');
     btn.textContent = 'Envoyer ma demande →';
     btn.disabled = false;
-    return;
   }
-
-  // Afficher confirmation
-  document.querySelector('.rdv-form form').style.display = 'none';
-  document.querySelector('.step-indicator').style.display = 'none';
-  document.querySelector('h3').style.display = 'none';
-  document.getElementById('confirmation').style.display = 'block';
 }
 </script>
 </body>
