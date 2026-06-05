@@ -166,7 +166,7 @@ async function init() {
 }
 
 async function loadRdvs() {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('rdv_requests')
     .select('*')
     .order('created_at', { ascending: false });
