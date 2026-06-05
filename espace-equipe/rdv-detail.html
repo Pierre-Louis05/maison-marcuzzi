@@ -55,7 +55,8 @@
 <script>
 const SUPABASE_URL = 'https://hzploaweyewjyxdhpmvo.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_NfYsr2yMHIYRJ6F3H96EXg_KWZE4_RQ';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const EMPLOYEES = [
   { id: 'jeremie', name: 'Jérémie Marcuzzi', poste: 'Dirigeant' },
@@ -81,7 +82,7 @@ let currentProfile = null;
 const rdvId = new URLSearchParams(window.location.search).get('id');
 
 async function init() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await db.auth.getSession();
   if (!session) { window.location.href = 'index.html'; return; }
   currentUser = session.user;
 
@@ -413,7 +414,7 @@ function showToast(msg, type = '') {
 
 // Déconnexion
 document.getElementById('logoutBtn').addEventListener('click', async () => {
-  await supabase.auth.signOut();
+  await db.auth.signOut();
   window.location.href = 'index.html';
 });
 

@@ -111,7 +111,8 @@
 <script>
 const SUPABASE_URL = 'https://hzploaweyewjyxdhpmvo.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_NfYsr2yMHIYRJ6F3H96EXg_KWZE4_RQ';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentTab = 'nouveau';
 let allRdvs = [];
@@ -136,12 +137,12 @@ const TAB_TITLES = {
 
 // Auth check
 async function init() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await db.auth.getSession();
   if (!session) { window.location.href = 'index.html'; return; }
   currentUser = session.user;
 
   // Charger profil
-  const { data: profile } = await supabase
+  const { data: profile } = await db
     .from('employee_profiles')
     .select('*')
     .eq('id', currentUser.id)
@@ -159,7 +160,7 @@ async function init() {
   await loadRdvs();
 
   // Realtime updates
-  supabase.channel('rdv_changes')
+  db.channel('rdv_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'rdv_requests' }, () => loadRdvs())
     .subscribe();
 }
@@ -255,7 +256,7 @@ document.querySelectorAll('[data-tab]').forEach(el => {
 
 // Déconnexion
 document.getElementById('logoutBtn').addEventListener('click', async () => {
-  await supabase.auth.signOut();
+  await db.auth.signOut();
   window.location.href = 'index.html';
 });
 
