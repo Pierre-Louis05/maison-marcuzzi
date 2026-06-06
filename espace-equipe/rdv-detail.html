@@ -52,7 +52,7 @@ const SUPABASE_KEY = 'sb_publishable_NfYsr2yMHIYRJ6F3H96EXg_KWZE4_RQ';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-emailjs.init('ZMblo6RSOOYjbAh81');
+emailjs.init({ publicKey: 'ZMblo6RSOOYjbAh81' });
 
 const EMPLOYEES = [
   { id: 'jeremie',      name: 'Jérémie Marcuzzi',     poste: 'Dirigeant' },
