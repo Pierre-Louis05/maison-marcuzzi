@@ -311,10 +311,32 @@ async function libererRdv() {
 async function confirmerRdv() {
   const date = document.getElementById('confirmedDate')?.value;
   const time = document.getElementById('confirmedTime')?.value;
-  if (!date || !time) { showToast("Veuillez renseigner la date et l'heure", 'error'); return; }
+  if (!date || !time) {
+    showToast("Veuillez renseigner la date et l'heure", 'error');
+    return;
+  }
   const myName = currentProfile ? currentProfile.prenom + ' ' + currentProfile.nom : 'Inconnu';
-  await updateRdv({ status: 'en_attente_confirmation', confirmed_date: date, confirmed_time: time, confirmed_by: myName });
-  showToast('Date enregistrée — en attente de confirmation client', 'success');
+  await updateRdv({
+    status: 'en_attente_confirmation',
+    confirmed_date: date,
+    confirmed_time: time,
+    confirmed_by: myName
+  });
+  await fetch('/.netlify/functions/send-confirmation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      clientEmail: rdv.client_email,
+      clientPrenom: rdv.client_prenom,
+      clientNom: rdv.client_nom,
+      clientTel: rdv.client_tel,
+      date: date,
+      heure: time,
+      confirmedBy: myName,
+      univers: rdv.univers
+    })
+  });
+  showToast('RDV confirmé — emails envoyés !', 'success');
   await loadRdv();
 }
 
