@@ -52,19 +52,25 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 const SUPABASE_URL = 'https://hzploaweyewjyxdhpmvo.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_NfYsr2yMHIYRJ6F3H96EXg_KWZE4_RQ';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const EMAILJS_PUBLIC_KEY = 'ZMblo6RSOOYjbAh81';
+const EMAILJS_SERVICE_ID = 'service_ip0tojk';
+const EMAILJS_TEMPLATE_ID = 'template_bkt7opu';
+emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
 const EMPLOYEES = [
-  { id: 'jeremie', name: 'Jérémie Marcuzzi', poste: 'Dirigeant' },
-  { id: 'simon', name: 'Simon Marcuzzi', poste: 'Responsable magasin' },
-  { id: 'louise', name: 'Louise Marcuzzi', poste: 'Alternante commerciale' },
-  { id: 'pierre-louis', name: 'Pierre-Louis Quentin', poste: 'Alternant commercial' },
-  { id: 'louis', name: 'Louis Bouger', poste: 'Alternant commercial' },
-  { id: 'freddy', name: 'Freddy Beaurepaire', poste: 'Commercial' }
+  { id: 'jeremie', name: 'Jérémie Marcuzzi', poste: 'Dirigeant', email: 'pl.quentin1+jeremie@gmail.com' },
+  { id: 'simon', name: 'Simon Marcuzzi', poste: 'Responsable magasin', email: 'pl.quentin1+simon@gmail.com' },
+  { id: 'louise', name: 'Louise Marcuzzi', poste: 'Alternante commerciale', email: 'pl.quentin1+louise@gmail.com' },
+  { id: 'pierre-louis', name: 'Pierre-Louis Quentin', poste: 'Alternant commercial', email: 'pl.quentin1+pierrelouis@gmail.com' },
+  { id: 'louis', name: 'Louis Bouger', poste: 'Alternant commercial', email: 'pl.quentin1+louis@gmail.com' },
+  { id: 'freddy', name: 'Freddy Beaurepaire', poste: 'Commercial', email: 'pl.quentin1+freddy@gmail.com' }
 ];
 
 const STATUS_LABELS = {
@@ -86,7 +92,7 @@ async function init() {
   if (!session) { window.location.href = 'index.html'; return; }
   currentUser = session.user;
 
-  const { data: profile } = await supabase
+  const { data: profile } = await db
     .from('employee_profiles')
     .select('*')
     .eq('id', currentUser.id)
@@ -104,7 +110,7 @@ async function init() {
 }
 
 async function loadRdv() {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('rdv_requests')
     .select('*')
     .eq('id', rdvId)
@@ -371,10 +377,91 @@ async function confirmerRdv() {
   await loadRdv();
 }
 
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
+
+function buildGoogleCalendarLink(rdvData) {
+  if (!rdvData.confirmed_date || !rdvData.confirmed_time) return '';
+  const start = new Date(`${rdvData.confirmed_date}T${rdvData.confirmed_time}`);
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  const toUtcStamp = (d) => d.getUTCFullYear() + pad2(d.getUTCMonth() + 1) + pad2(d.getUTCDate())
+    + 'T' + pad2(d.getUTCHours()) + pad2(d.getUTCMinutes()) + pad2(d.getUTCSeconds()) + 'Z';
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: `RDV Maison Marcuzzi — ${rdvData.client_prenom} ${rdvData.client_nom}`,
+    dates: `${toUtcStamp(start)}/${toUtcStamp(end)}`,
+    details: `Rendez-vous chez Maison Marcuzzi (Top Carrelage), 22 Avenue de l'Europe, 59270 Bailleul.`,
+    location: `22 Avenue de l'Europe, 59270 Bailleul`
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function formatDateConfirmee(rdvData) {
+  if (!rdvData.confirmed_date) return '';
+  return new Date(`${rdvData.confirmed_date}T00:00:00`).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function formatHeureConfirmee(time) {
+  if (!time) return '';
+  const [h, m] = time.split(':');
+  return `${h}h${m}`;
+}
+
+function buildUniversLine(rdvData) {
+  if (!rdvData.univers || rdvData.univers.length === 0) return '';
+  const labels = rdvData.univers.map(u => u.charAt(0).toUpperCase() + u.slice(1)).join(', ');
+  return `<p style="margin: 8px 0;"><strong>🏠 Univers concernés :</strong> ${labels}</p>`;
+}
+
+async function envoyerEmailsConfirmation(rdvData) {
+  const calLink = buildGoogleCalendarLink(rdvData);
+  const dateAffichee = formatDateConfirmee(rdvData);
+  const heureAffichee = formatHeureConfirmee(rdvData.confirmed_time);
+  const universLine = buildUniversLine(rdvData);
+  const clientNomComplet = `${rdvData.client_prenom} ${rdvData.client_nom}`;
+
+  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    to_email: rdvData.client_email,
+    title: 'Votre rendez-vous est confirmé !',
+    intro: `Bonjour ${rdvData.client_prenom}, votre rendez-vous chez Maison Marcuzzi est confirmé pour la date suivante :`,
+    date: dateAffichee,
+    heure: heureAffichee,
+    univers_line: universLine,
+    google_cal_link: calLink,
+    signature: `À très bientôt,<br>L'équipe Maison Marcuzzi`
+  });
+
+  const assignedNames = rdvData.assigned_to || [];
+  const collaborateurs = EMPLOYEES.filter(e => assignedNames.includes(e.name));
+  for (const collab of collaborateurs) {
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_email: collab.email,
+      title: `RDV confirmé avec ${clientNomComplet}`,
+      intro: `Bonjour ${collab.name.split(' ')[0]}, le rendez-vous avec ${clientNomComplet} est confirmé pour la date suivante :`,
+      date: dateAffichee,
+      heure: heureAffichee,
+      univers_line: universLine,
+      google_cal_link: calLink,
+      signature: `Pensez à l'ajouter à votre agenda.`
+    });
+  }
+}
+
 async function passerConfirme() {
   await updateRdv({ status: 'confirme' });
-  showToast('RDV confirmé ! ✓', 'success');
   await loadRdv();
+  showToast('RDV confirmé ! ✓', 'success');
+
+  if (rdv) {
+    try {
+      await envoyerEmailsConfirmation(rdv);
+      showToast('Emails de confirmation envoyés ✓', 'success');
+    } catch (err) {
+      console.error('Erreur envoi emails de confirmation:', err);
+      showToast('RDV confirmé, mais erreur lors de l\'envoi des emails', 'error');
+    }
+  }
 }
 
 async function archiver() {
@@ -397,7 +484,7 @@ async function saveNotes() {
 }
 
 async function updateRdv(updates) {
-  const { error } = await supabase
+  const { error } = await db
     .from('rdv_requests')
     .update(updates)
     .eq('id', rdvId);

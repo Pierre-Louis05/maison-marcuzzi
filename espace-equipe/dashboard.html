@@ -182,11 +182,6 @@ function updateStats() {
   const counts = { nouveau: 0, pris_en_charge: 0, en_attente_confirmation: 0, confirme: 0, archive: 0 };
   allRdvs.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
 
-  Object.entries(counts).forEach(([status, count]) => {
-    const el = document.getElementById('stat-' + status.split('_')[0] + (status === 'en_attente_confirmation' ? 'attente' : status === 'pris_en_charge' ? 'pris' : ''));
-    // Update stat cards
-  });
-
   document.getElementById('stat-nouveau').textContent = counts.nouveau;
   document.getElementById('stat-pris').textContent = counts.pris_en_charge;
   document.getElementById('stat-attente').textContent = counts.en_attente_confirmation;
