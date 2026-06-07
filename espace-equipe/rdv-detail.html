@@ -411,7 +411,7 @@ function formatHeureConfirmee(time) {
 function buildUniversLine(rdvData) {
   if (!rdvData.univers || rdvData.univers.length === 0) return '';
   const labels = rdvData.univers.map(u => u.charAt(0).toUpperCase() + u.slice(1)).join(', ');
-  return `<p style="margin: 8px 0;"><strong>🏠 Univers concernés :</strong> ${labels}</p>`;
+  return `🏠 Univers concernés : ${labels}`;
 }
 
 async function envoyerEmailsConfirmation(rdvData) {
