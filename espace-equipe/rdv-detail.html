@@ -429,7 +429,9 @@ async function envoyerEmailsConfirmation(rdvData) {
     heure: heureAffichee,
     univers_line: universLine,
     google_cal_link: calLink,
-    signature: `À très bientôt — L'équipe Maison Marcuzzi`
+    signature: `À très bientôt — L'équipe Maison Marcuzzi
+
+En cas d'imprévu, merci de nous appeler au 03 28 48 08 08. Ceci est un email automatique, merci de ne pas y répondre.`
   });
 
   const assignedNames = rdvData.assigned_to || [];
@@ -443,7 +445,9 @@ async function envoyerEmailsConfirmation(rdvData) {
       heure: heureAffichee,
       univers_line: universLine,
       google_cal_link: calLink,
-      signature: `Pensez à l'ajouter à votre agenda.`
+      signature: `Pensez à l'ajouter à votre agenda.
+
+En cas d'imprévu, merci d'appeler directement le magasin au 03 28 48 08 08. Ceci est un email automatique, merci de ne pas y répondre.`
     });
   }
 }
