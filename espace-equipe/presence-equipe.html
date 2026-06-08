@@ -152,7 +152,7 @@ let allPointagesAujourdhui = [];
 
 // Liste de l'équipe (même base que pour l'assignation des RDV)
 const EQUIPE = [
-  { name: 'Jérémie Marcuzzi', poste: 'Dirigeant' },
+  { name: 'Jérémie Marcuzzi', poste: 'Dirigeant de la société' },
   { name: 'Simon Marcuzzi', poste: 'Responsable magasin' },
   { name: 'Louise Marcuzzi', poste: 'Alternante commerciale' },
   { name: 'Pierre-Louis Quentin', poste: 'Alternant commercial' },
@@ -201,7 +201,7 @@ async function init() {
     .eq('id', currentUser.id)
     .single();
 
-  if (!profile || (profile.poste !== 'Dirigeant' && profile.poste !== 'Responsable magasin')) {
+  if (!profile || (profile.poste !== 'Dirigeant de la société' && profile.poste !== 'Responsable magasin')) {
     // Accès réservé — redirection silencieuse
     window.location.href = 'dashboard.html';
     return;

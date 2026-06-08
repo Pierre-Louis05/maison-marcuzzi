@@ -42,6 +42,6 @@ using (
   exists (
     select 1 from employee_profiles
     where employee_profiles.id = auth.uid()
-    and employee_profiles.poste in ('Dirigeant', 'Responsable magasin')
+    and employee_profiles.poste in ('Dirigeant de la société', 'Responsable magasin')
   )
 );

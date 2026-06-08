@@ -107,7 +107,7 @@ async function init() {
     document.getElementById('sidebarName').textContent = profile.prenom + ' ' + profile.nom;
     document.getElementById('sidebarRole').textContent = profile.poste;
     document.getElementById('sidebarAvatar').textContent = profile.prenom[0] + profile.nom[0];
-    if (profile.poste === 'Dirigeant' || profile.poste === 'Responsable magasin') {
+    if (profile.poste === 'Dirigeant de la société' || profile.poste === 'Responsable magasin') {
       document.getElementById('lienPresenceEquipe').style.display = '';
     }
   }

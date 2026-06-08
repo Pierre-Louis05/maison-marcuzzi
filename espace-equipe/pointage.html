@@ -248,7 +248,7 @@ async function init() {
     document.getElementById('sidebarAvatar').textContent = profile.prenom[0] + profile.nom[0];
 
     // Affiche le lien "Présence équipe" uniquement pour le Dirigeant / Responsable magasin
-    if (profile.poste === 'Dirigeant' || profile.poste === 'Responsable magasin') {
+    if (profile.poste === 'Dirigeant de la société' || profile.poste === 'Responsable magasin') {
       const nav = document.getElementById('sidebarNav');
       const link = document.createElement('a');
       link.href = 'presence-equipe.html';
