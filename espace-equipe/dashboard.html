@@ -212,7 +212,8 @@ function renderList() {
   }
 
   container.innerHTML = '<div class="rdv-list">' + filtered.map(rdv => `
-    <a href="rdv-detail.html?id=${rdv.id}" class="rdv-card">
+    <a href="rdv-detail.html?id=${rdv.id}" class="rdv-card" style="position:relative;">
+      <button type="button" class="rdv-delete-btn" title="Supprimer définitivement cette demande" onclick="supprimerRdv(event, '${rdv.id}')" style="position:absolute; top:0.7rem; right:0.7rem; width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:var(--surface2); border:1px solid var(--border); border-radius:50%; color:var(--text-muted); font-size:0.95rem; cursor:pointer; transition:var(--transition); z-index:2;" onmouseover="this.style.background='#e25c5c'; this.style.color='#fff'; this.style.borderColor='#e25c5c';" onmouseout="this.style.background='var(--surface2)'; this.style.color='var(--text-muted)'; this.style.borderColor='var(--border)';">🗑️</button>
       <div class="rdv-card-left">
         <div class="rdv-client-name">${rdv.client_prenom} ${rdv.client_nom}</div>
         <div class="rdv-meta">
@@ -235,6 +236,23 @@ function renderList() {
       </div>
     </a>
   `).join('') + '</div>';
+}
+
+async function supprimerRdv(event, id) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (!confirm('Supprimer définitivement cette demande de rendez-vous ? Cette action est irréversible.')) return;
+
+  const { error } = await db.from('rdv_requests').delete().eq('id', id);
+
+  if (error) {
+    showToast('Erreur lors de la suppression', 'error');
+    return;
+  }
+
+  showToast('Demande supprimée');
+  await loadRdvs();
 }
 
 // Navigation tabs

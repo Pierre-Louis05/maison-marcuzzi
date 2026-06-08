@@ -305,6 +305,13 @@ function renderPage() {
           </button>
         </div>` : ''}
 
+        <div class="action-section">
+          <h3>Zone dangereuse</h3>
+          <button class="btn-action" onclick="supprimerDefinitivement('${rdv.id}')" style="background:transparent; border:1px solid #e25c5c; color:#e25c5c;">
+            🗑️ Supprimer définitivement
+          </button>
+        </div>
+
         <!-- Infos contact rapide -->
         <div class="action-section">
           <h3>Contact rapide</h3>
@@ -466,6 +473,20 @@ async function passerConfirme() {
       showToast('RDV confirmé, mais erreur lors de l\'envoi des emails', 'error');
     }
   }
+}
+
+async function supprimerDefinitivement(id) {
+  if (!confirm('Supprimer définitivement cette demande de rendez-vous ? Cette action est irréversible et effacera toutes les données liées (notes, confirmation, etc.).')) return;
+
+  const { error } = await db.from('rdv_requests').delete().eq('id', id);
+
+  if (error) {
+    showToast('Erreur lors de la suppression', 'error');
+    return;
+  }
+
+  showToast('Demande supprimée');
+  setTimeout(() => window.location.href = 'dashboard.html', 1200);
 }
 
 async function archiver() {
