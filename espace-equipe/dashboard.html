@@ -212,8 +212,7 @@ function renderList() {
   }
 
   container.innerHTML = '<div class="rdv-list">' + filtered.map(rdv => `
-    <a href="rdv-detail.html?id=${rdv.id}" class="rdv-card" style="position:relative;">
-      <button type="button" class="rdv-delete-btn" title="Supprimer définitivement cette demande" onclick="supprimerRdv(event, '${rdv.id}')" style="position:absolute; top:0.7rem; right:0.7rem; width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:var(--surface2); border:1px solid var(--border); border-radius:50%; color:var(--text-muted); font-size:0.95rem; cursor:pointer; transition:var(--transition); z-index:2;" onmouseover="this.style.background='#e25c5c'; this.style.color='#fff'; this.style.borderColor='#e25c5c';" onmouseout="this.style.background='var(--surface2)'; this.style.color='var(--text-muted)'; this.style.borderColor='var(--border)';">🗑️</button>
+    <a href="rdv-detail.html?id=${rdv.id}" class="rdv-card">
       <div class="rdv-card-left">
         <div class="rdv-client-name">${rdv.client_prenom} ${rdv.client_nom}</div>
         <div class="rdv-meta">
@@ -227,7 +226,10 @@ function renderList() {
         </div>
       </div>
       <div class="rdv-card-right">
-        <span class="status-badge status-${rdv.status}">${STATUS_LABELS[rdv.status]}</span>
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <span class="status-badge status-${rdv.status}">${STATUS_LABELS[rdv.status]}</span>
+          <button type="button" title="Supprimer définitivement cette demande" onclick="supprimerRdv(event, '${rdv.id}')" style="flex-shrink:0; width:28px; height:28px; display:flex; align-items:center; justify-content:center; background:var(--surface2); border:1px solid var(--border); border-radius:50%; color:var(--text-muted); font-size:0.85rem; cursor:pointer; transition:var(--transition);" onmouseover="this.style.background='#e25c5c'; this.style.color='#fff'; this.style.borderColor='#e25c5c';" onmouseout="this.style.background='var(--surface2)'; this.style.color='var(--text-muted)'; this.style.borderColor='var(--border)';">🗑️</button>
+        </div>
         <span class="rdv-date">${new Date(rdv.created_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</span>
         ${rdv.assigned_to && rdv.assigned_to.length > 0 ? `
           <div class="assigned-avatars">
