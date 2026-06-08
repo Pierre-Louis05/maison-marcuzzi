@@ -478,10 +478,16 @@ async function passerConfirme() {
 async function supprimerDefinitivement(id) {
   if (!confirm('Supprimer définitivement cette demande de rendez-vous ? Cette action est irréversible et effacera toutes les données liées (notes, confirmation, etc.).')) return;
 
-  const { error } = await db.from('rdv_requests').delete().eq('id', id);
+  const { data, error } = await db.from('rdv_requests').delete().eq('id', id).select();
 
   if (error) {
     showToast('Erreur lors de la suppression', 'error');
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    showToast('Suppression refusée par la base de données (permissions). Voir la console pour plus de détails.', 'error');
+    console.warn('Suppression bloquée probablement par une policy RLS Supabase manquante pour DELETE sur rdv_requests. id=', id);
     return;
   }
 
