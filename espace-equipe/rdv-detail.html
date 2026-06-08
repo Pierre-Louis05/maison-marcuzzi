@@ -29,6 +29,8 @@
       <a href="dashboard.html" class="sidebar-link">← Retour au dashboard</a>
       <a href="messages.html" class="sidebar-link">💬 Messages de contact</a>
       <a href="temoignages.html" class="sidebar-link">⭐ Témoignages</a>
+      <a href="pointage.html" class="sidebar-link">🕐 Mon pointage</a>
+      <a href="presence-equipe.html" class="sidebar-link" id="lienPresenceEquipe" style="display:none;">👥 Présence équipe</a>
     </nav>
     <div class="sidebar-footer">
       <button class="btn-logout" id="logoutBtn">Déconnexion</button>
@@ -105,6 +107,9 @@ async function init() {
     document.getElementById('sidebarName').textContent = profile.prenom + ' ' + profile.nom;
     document.getElementById('sidebarRole').textContent = profile.poste;
     document.getElementById('sidebarAvatar').textContent = profile.prenom[0] + profile.nom[0];
+    if (profile.poste === 'Dirigeant' || profile.poste === 'Responsable magasin') {
+      document.getElementById('lienPresenceEquipe').style.display = '';
+    }
   }
 
   if (!rdvId) { window.location.href = 'dashboard.html'; return; }

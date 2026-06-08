@@ -32,6 +32,12 @@
       <a href="temoignages.html" class="sidebar-link">
         <span>⭐</span> Témoignages
       </a>
+      <a href="pointage.html" class="sidebar-link">
+        <span>🕐</span> Mon pointage
+      </a>
+      <a href="presence-equipe.html" class="sidebar-link" id="lienPresenceEquipe" style="display:none;">
+        <span>👥</span> Présence équipe
+      </a>
       <div class="sidebar-section">Messages de contact</div>
       <a href="#" class="sidebar-link active" data-tab="nouveau">
         <span>🆕</span> Nouveaux
@@ -137,6 +143,9 @@ async function init() {
     document.getElementById('sidebarName').textContent = profile.prenom + ' ' + profile.nom;
     document.getElementById('sidebarRole').textContent = profile.poste;
     document.getElementById('sidebarAvatar').textContent = profile.prenom[0] + profile.nom[0];
+    if (profile.poste === 'Dirigeant' || profile.poste === 'Responsable magasin') {
+      document.getElementById('lienPresenceEquipe').style.display = '';
+    }
   } else {
     document.getElementById('sidebarName').textContent = currentUser.email;
   }

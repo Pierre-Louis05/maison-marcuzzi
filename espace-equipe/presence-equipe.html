@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Présence équipe — Espace Équipe Maison Marcuzzi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Lato:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    .presence-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 3rem;
+    }
+    .presence-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .presence-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:1rem; color:#fff; background:var(--or);
+      flex-shrink:0;
+    }
+    .presence-name { font-weight:600; color:var(--text); font-size:0.92rem; }
+    .presence-poste { font-size:0.74rem; color:var(--text-muted); margin-bottom:0.4rem; }
+    .presence-badge {
+      display:inline-block; padding:0.3rem 0.7rem; border-radius:999px;
+      font-size:0.7rem; font-weight:700; letter-spacing:0.03em;
+    }
+    .presence-badge.attente { background: rgba(245,158,11,0.15); color: var(--attente); }
+    .presence-badge.travail { background: rgba(16,185,129,0.15); color: var(--confirme); }
+    .presence-badge.pause { background: rgba(139,92,246,0.15); color: var(--pris); }
+    .presence-badge.termine { background: rgba(107,114,128,0.2); color: var(--text-muted); }
+    .presence-times { font-size:0.72rem; color:var(--text-muted); margin-top:0.35rem; }
+
+    .historique-table { width:100%; border-collapse: collapse; font-size: 0.85rem; }
+    .historique-table th {
+      text-align:left; padding:0.7rem 1rem; color:var(--text-muted);
+      font-size: 0.72rem; text-transform:uppercase; letter-spacing:0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+    .historique-table td { padding:0.8rem 1rem; color:var(--text); border-bottom: 1px solid var(--border); }
+    .historique-table tr:last-child td { border-bottom:none; }
+    .total-pill {
+      display:inline-block; background:var(--surface2); color:var(--or);
+      padding:0.25rem 0.7rem; border-radius:999px; font-weight:700; font-size:0.78rem;
+    }
+    .filter-bar {
+      display:flex; align-items:center; gap:1rem; margin-bottom:1.2rem; flex-wrap:wrap;
+    }
+    .filter-bar select {
+      background: var(--surface2); border:1px solid var(--border); color:var(--text);
+      padding:0.6rem 1rem; border-radius:8px; font-size:0.85rem;
+    }
+    .week-total { font-size:0.85rem; color:var(--text-muted); }
+    .week-total strong { color:var(--or); }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-main">Maison Marcuzzi</div>
+      <span class="sidebar-logo-sub">Espace Équipe</span>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebarName">Chargement…</div>
+        <div class="sidebar-user-role" id="sidebarRole"></div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Navigation</div>
+      <a href="dashboard.html" class="sidebar-link">
+        <span>📅</span> Demandes RDV
+      </a>
+      <a href="messages.html" class="sidebar-link">
+        <span>💬</span> Messages de contact
+      </a>
+      <a href="temoignages.html" class="sidebar-link">
+        <span>⭐</span> Témoignages
+      </a>
+      <div class="sidebar-section">Équipe</div>
+      <a href="pointage.html" class="sidebar-link">
+        <span>🕐</span> Mon pointage
+      </a>
+      <a href="presence-equipe.html" class="sidebar-link active">
+        <span>👥</span> Présence équipe
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Présence équipe</div>
+      <div class="topbar-actions">
+        <span style="font-size:0.78rem; color:var(--text-muted);" id="lastRefresh"></span>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <h3 style="margin-bottom:1rem;">Aujourd'hui — en direct</h3>
+      <div class="presence-grid" id="presenceGrid">
+        <div class="loading"><div class="spinner"></div> Chargement…</div>
+      </div>
+
+      <h3 style="margin-bottom:1rem;">Historique d'un collaborateur</h3>
+      <div class="filter-bar">
+        <select id="employeeSelect"></select>
+        <span class="week-total" id="weekTotal"></span>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden;">
+        <div id="historiqueContainer">
+          <div class="loading"><div class="spinner"></div> Chargement de l'historique…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const SUPABASE_URL = 'https://hzploaweyewjyxdhpmvo.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_NfYsr2yMHIYRJ6F3H96EXg_KWZE4_RQ';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+let allPointagesAujourdhui = [];
+
+// Liste de l'équipe (même base que pour l'assignation des RDV)
+const EQUIPE = [
+  { name: 'Jérémie Marcuzzi', poste: 'Dirigeant' },
+  { name: 'Simon Marcuzzi', poste: 'Responsable magasin' },
+  { name: 'Louise Marcuzzi', poste: 'Alternante commerciale' },
+  { name: 'Pierre-Louis Quentin', poste: 'Alternant commercial' },
+  { name: 'Louis Bouger', poste: 'Alternant commercial' },
+  { name: 'Freddy Beaurepaire', poste: 'Commercial' }
+];
+
+const COLORS = ['#4285F4','#34A853','#EA4335','#FBBC05','#9C27B0','#FF7043','#00897B','#E53935'];
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function heureFmt(iso) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+function dureeFmt(heuresDecimal) {
+  if (heuresDecimal == null) return '—';
+  const h = Math.floor(heuresDecimal);
+  const m = Math.round((heuresDecimal - h) * 60);
+  return `${h}h${m.toString().padStart(2, '0')}`;
+}
+function calculerHeures(p) {
+  if (!p.arrivee || !p.depart) return null;
+  let total = (new Date(p.depart) - new Date(p.arrivee)) / 3600000;
+  if (p.pause_debut && p.pause_fin) total -= (new Date(p.pause_fin) - new Date(p.pause_debut)) / 3600000;
+  return Math.max(total, 0);
+}
+function statutDe(p) {
+  if (!p || !p.arrivee) return { label: 'Pas encore arrivé(e)', css: 'attente' };
+  if (p.depart) return { label: 'Parti(e)', css: 'termine' };
+  if (p.pause_debut && !p.pause_fin) return { label: 'En pause déjeuner', css: 'pause' };
+  return { label: 'Au travail', css: 'travail' };
+}
+
+// ===== Auth & contrôle d'accès =====
+async function init() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) { window.location.href = 'index.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await db
+    .from('employee_profiles')
+    .select('*')
+    .eq('id', currentUser.id)
+    .single();
+
+  if (!profile || (profile.poste !== 'Dirigeant' && profile.poste !== 'Responsable magasin')) {
+    // Accès réservé — redirection silencieuse
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  currentProfile = profile;
+  document.getElementById('sidebarName').textContent = profile.prenom + ' ' + profile.nom;
+  document.getElementById('sidebarRole').textContent = profile.poste;
+  document.getElementById('sidebarAvatar').textContent = profile.prenom[0] + profile.nom[0];
+
+  // Sélecteur d'employé pour l'historique
+  const select = document.getElementById('employeeSelect');
+  select.innerHTML = EQUIPE.map(e => `<option value="${e.name}">${e.name} — ${e.poste}</option>`).join('');
+  select.addEventListener('change', () => loadHistorique(select.value));
+
+  await loadPresenceJour();
+  await loadHistorique(select.value);
+
+  // Realtime : rafraîchit dès qu'un pointage change
+  db.channel('presence_equipe_changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pointages' }, () => {
+      loadPresenceJour();
+      loadHistorique(document.getElementById('employeeSelect').value);
+    })
+    .subscribe();
+}
+
+// ===== Présence en direct =====
+async function loadPresenceJour() {
+  const { data, error } = await db
+    .from('pointages')
+    .select('*')
+    .eq('date', todayStr());
+
+  const grid = document.getElementById('presenceGrid');
+  if (error) { grid.innerHTML = `<div class="empty-state"><p>Erreur de chargement.</p></div>`; return; }
+
+  allPointagesAujourdhui = data || [];
+
+  grid.innerHTML = EQUIPE.map((e, i) => {
+    const p = allPointagesAujourdhui.find(x => x.employee_name === e.name);
+    const statut = statutDe(p);
+    const couleur = COLORS[i % COLORS.length];
+    const initiale = e.name.charAt(0).toUpperCase();
+
+    let times = '';
+    if (p) {
+      const parts = [];
+      if (p.arrivee) parts.push(`Arrivée ${heureFmt(p.arrivee)}`);
+      if (p.pause_debut) parts.push(`Pause ${heureFmt(p.pause_debut)}${p.pause_fin ? '–' + heureFmt(p.pause_fin) : '…'}`);
+      if (p.depart) parts.push(`Départ ${heureFmt(p.depart)}`);
+      times = parts.join(' · ');
+    }
+
+    return `
+      <div class="presence-card">
+        <div class="presence-avatar" style="background:${couleur};">${initiale}</div>
+        <div>
+          <div class="presence-name">${e.name}</div>
+          <div class="presence-poste">${e.poste}</div>
+          <span class="presence-badge ${statut.css}">${statut.label}</span>
+          ${times ? `<div class="presence-times">${times}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('lastRefresh').textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ===== Historique d'un collaborateur =====
+async function loadHistorique(employeeName) {
+  const container = document.getElementById('historiqueContainer');
+  container.innerHTML = `<div class="loading"><div class="spinner"></div> Chargement…</div>`;
+
+  const { data, error } = await db
+    .from('pointages')
+    .select('*')
+    .eq('employee_name', employeeName)
+    .order('date', { ascending: false })
+    .limit(14);
+
+  if (error) {
+    container.innerHTML = `<div class="empty-state"><p>Erreur de chargement de l'historique.</p></div>`;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🕐</div>
+        <p>Aucun pointage enregistré pour ${employeeName}.</p>
+      </div>`;
+    document.getElementById('weekTotal').textContent = '';
+    return;
+  }
+
+  // Total des 7 derniers jours
+  const aujourdhui = new Date();
+  const ilYA7Jours = new Date(aujourdhui); ilYA7Jours.setDate(aujourdhui.getDate() - 7);
+  const totalSemaine = data
+    .filter(p => new Date(p.date) >= ilYA7Jours)
+    .reduce((acc, p) => acc + (calculerHeures(p) || 0), 0);
+  document.getElementById('weekTotal').innerHTML = `7 derniers jours : <strong>${dureeFmt(totalSemaine)}</strong> travaillées`;
+
+  container.innerHTML = `
+    <table class="historique-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Arrivée</th>
+          <th>Pause déjeuner</th>
+          <th>Départ</th>
+          <th>Total travaillé</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(p => `
+          <tr>
+            <td style="text-transform:capitalize;">${new Date(p.date).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })}</td>
+            <td>${heureFmt(p.arrivee) || '—'}</td>
+            <td>${p.pause_debut && p.pause_fin ? `${heureFmt(p.pause_debut)} – ${heureFmt(p.pause_fin)}` : (p.pause_debut ? `${heureFmt(p.pause_debut)} – …` : '—')}</td>
+            <td>${heureFmt(p.depart) || '—'}</td>
+            <td><span class="total-pill">${dureeFmt(calculerHeures(p))}</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// Déconnexion
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await db.auth.signOut();
+  window.location.href = 'index.html';
+});
+
+// Toast
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>
