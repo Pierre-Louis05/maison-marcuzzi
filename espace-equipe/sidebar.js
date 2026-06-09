@@ -84,12 +84,14 @@
     sidebar.addEventListener('mouseenter', function () {
       if (!sidebar.classList.contains('pinned')) {
         sidebar.classList.add('expanded');
+        main.classList.add('sidebar-pinned');
       }
     });
 
     sidebar.addEventListener('mouseleave', function () {
       if (!sidebar.classList.contains('pinned')) {
         sidebar.classList.remove('expanded');
+        main.classList.remove('sidebar-pinned');
       }
     });
   }
