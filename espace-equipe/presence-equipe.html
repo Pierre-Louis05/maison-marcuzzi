@@ -291,6 +291,7 @@ async function init() {
   document.getElementById('sidebarName').textContent = profile.prenom + ' ' + profile.nom;
   document.getElementById('sidebarRole').textContent = profile.poste;
   document.getElementById('sidebarAvatar').textContent = profile.prenom[0] + profile.nom[0];
+  document.getElementById('lienPresenceEquipe').style.display = 'flex';
 
   // Sélecteur d'employé pour l'historique
   const select = document.getElementById('employeeSelect');

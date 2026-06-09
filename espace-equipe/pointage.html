@@ -250,14 +250,8 @@ async function init() {
     document.getElementById('sidebarRole').textContent = profile.poste;
     document.getElementById('sidebarAvatar').textContent = profile.prenom[0] + profile.nom[0];
 
-    // Affiche le lien "Présence équipe" uniquement pour le Dirigeant / Responsable magasin
     if (profile.poste === 'Dirigeant de la société' || profile.poste === 'Responsable magasin') {
-      const nav = document.getElementById('sidebarNav');
-      const link = document.createElement('a');
-      link.href = 'presence-equipe.html';
-      link.className = 'sidebar-link';
-      link.innerHTML = '<span>👥</span> Présence équipe';
-      nav.appendChild(link);
+      document.getElementById('lienPresenceEquipe').style.display = 'flex';
     }
   } else {
     document.getElementById('sidebarName').textContent = currentUser.email;
