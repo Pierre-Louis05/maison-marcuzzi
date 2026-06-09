@@ -24,46 +24,17 @@
         <div class="sidebar-user-role" id="sidebarRole"></div>
       </div>
     </div>
-    <nav class="sidebar-nav">
+        <nav class="sidebar-nav">
       <div class="sidebar-section">Demandes RDV</div>
-      <a href="#" class="sidebar-link active" data-tab="nouveau">
-        <span>🆕</span> Nouvelles demandes
-        <span class="sidebar-badge" id="badge-nouveau">0</span>
-      </a>
-      <a href="#" class="sidebar-link" data-tab="pris_en_charge">
-        <span>👤</span> Prises en charge
-        <span class="sidebar-badge" id="badge-pris" style="background:var(--pris);">0</span>
-      </a>
-      <a href="#" class="sidebar-link" data-tab="en_attente_confirmation">
-        <span>⏳</span> En attente confirmation
-        <span class="sidebar-badge" id="badge-attente" style="background:var(--attente); color:var(--noir);">0</span>
-      </a>
-      <a href="#" class="sidebar-link" data-tab="confirme">
-        <span>✅</span> Confirmés
-        <span class="sidebar-badge" id="badge-confirme" style="background:var(--confirme);">0</span>
-      </a>
-      <a href="#" class="sidebar-link" data-tab="archive">
-        <span>📁</span> Archives
-        <span class="sidebar-badge" id="badge-archive" style="background:var(--archive);">0</span>
-      </a>
+      <a href="dashboard.html" class="sidebar-link active"><span>📅</span> Tableau de bord<span class="sidebar-badge" id="badge-nouveau" style="display:none;">0</span></a>
       <div class="sidebar-section">Site web</div>
-      <a href="messages.html" class="sidebar-link">
-        <span>💬</span> Messages de contact
-      </a>
-      <a href="temoignages.html" class="sidebar-link">
-        <span>⭐</span> Témoignages
-      </a>
+      <a href="messages.html" class="sidebar-link"><span>💬</span> Messages de contact</a>
+      <a href="temoignages.html" class="sidebar-link"><span>⭐</span> Témoignages</a>
       <div class="sidebar-section">Équipe</div>
-      <a href="pointage.html" class="sidebar-link">
-        <span>🕐</span> Mon pointage
-      </a>
-      <a href="conges.html" class="sidebar-link">
-        <span>🏖️</span> Mes congés
-      </a>
+      <a href="pointage.html" class="sidebar-link"><span>🕐</span> Mon pointage</a>
+      <a href="conges.html" class="sidebar-link"><span>🏖️</span> Mes congés</a>
       <a href="commandes.html" class="sidebar-link"><span>📦</span> Commandes</a>
-      <a href="presence-equipe.html" class="sidebar-link" id="lienPresenceEquipe" style="display:none;">
-        <span>👥</span> Présence équipe
-      </a>
+      <a href="presence-equipe.html" class="sidebar-link" id="lienPresenceEquipe" style="display:none;"><span>👥</span> Présence équipe</a>
     </nav>
     <div class="sidebar-footer">
       <button class="btn-logout" id="logoutBtn">Déconnexion</button>
@@ -209,12 +180,17 @@ function updateStats() {
   document.getElementById('stat-confirme').textContent = counts.confirme;
   document.getElementById('stat-archive').textContent = counts.archive;
 
-  // Badges sidebar et tabs
-  const ids = { nouveau: 'nouveau', pris_en_charge: 'pris', en_attente_confirmation: 'attente', confirme: 'confirme', archive: 'archive' };
-  Object.entries(ids).forEach(([status, key]) => {
-    const badge = document.getElementById('badge-' + key);
+  // Badge sidebar : total des demandes actives (hors archives)
+  const totalActif = counts.nouveau + counts.pris_en_charge + counts.en_attente_confirmation + counts.confirme;
+  const badgeSidebar = document.getElementById('badge-nouveau');
+  if (badgeSidebar) {
+    badgeSidebar.textContent = totalActif;
+    badgeSidebar.style.display = totalActif > 0 ? '' : 'none';
+  }
+  // Badges des tabs
+  const tcIds = { nouveau: 'nouveau', pris_en_charge: 'pris', en_attente_confirmation: 'attente', confirme: 'confirme', archive: 'archive' };
+  Object.entries(tcIds).forEach(([status, key]) => {
     const tc = document.getElementById('tc-' + key);
-    if (badge) badge.textContent = counts[status];
     if (tc) tc.textContent = counts[status];
   });
 }
