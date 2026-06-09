@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Commandes — Espace Équipe Maison Marcuzzi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Lato:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    /* ── Barre de contrôle ──────────────────────────── */
+    .cmd-controls {
+      display: flex; align-items: center; gap: 1rem;
+      flex-wrap: wrap; margin-bottom: 1.2rem;
+    }
+    .cmd-search {
+      flex: 1; min-width: 220px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: 0.6rem 1rem; border-radius: 8px;
+      font-size: 0.88rem; font-family: inherit;
+    }
+    .cmd-search:focus { outline: none; border-color: var(--or); }
+    .btn-nouvelle {
+      background: var(--or); color: var(--noir); border: none;
+      border-radius: 8px; padding: 0.62rem 1.3rem;
+      font-size: 0.88rem; font-weight: 700; cursor: pointer;
+      white-space: nowrap; transition: var(--transition);
+    }
+    .btn-nouvelle:hover { opacity: 0.85; }
+    .btn-transport {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 0.62rem 1.1rem;
+      font-size: 0.85rem; cursor: pointer; white-space: nowrap;
+      transition: var(--transition);
+    }
+    .btn-transport:hover { border-color: var(--or); color: var(--or); }
+
+    /* ── Onglets pays ────────────────────────────────── */
+    .cmd-tabs {
+      display: flex; gap: 0.3rem; flex-wrap: wrap;
+      margin-bottom: 1rem; border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+    .cmd-tab {
+      background: none; border: none; border-bottom: 2px solid transparent;
+      padding: 0.55rem 1.1rem; font-size: 0.82rem; font-weight: 600;
+      color: var(--text-muted); cursor: pointer; transition: var(--transition);
+      display: flex; align-items: center; gap: 0.4rem;
+      margin-bottom: -1px;
+    }
+    .cmd-tab:hover { color: var(--text); }
+    .cmd-tab.active { color: var(--or); border-bottom-color: var(--or); }
+    .cmd-tab-count {
+      background: var(--surface2); color: var(--text-muted);
+      border-radius: 999px; font-size: 0.7rem; font-weight: 700;
+      padding: 0.1rem 0.5rem; min-width: 20px; text-align: center;
+    }
+    .cmd-tab.active .cmd-tab-count { background: rgba(212,175,55,0.15); color: var(--or); }
+
+    /* ── Filtres statut ──────────────────────────────── */
+    .status-chips {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.1rem;
+    }
+    .status-chip {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 999px; padding: 0.28rem 0.85rem;
+      font-size: 0.74rem; font-weight: 600; cursor: pointer;
+      transition: var(--transition); white-space: nowrap;
+      color: var(--text-muted);
+    }
+    .status-chip:hover { border-color: var(--or); color: var(--or); }
+    .status-chip.active { color: #fff; border-color: transparent; }
+    .status-chip[data-s="TOUS"].active          { background: var(--or); color: var(--noir); }
+    .status-chip[data-s="À PAYER AVANT PRÉPARATION"].active { background: #B7440A; }
+    .status-chip[data-s="PAYÉ"].active           { background: #1A5276; }
+    .status-chip[data-s="DEMANDE DE CHARGEMENT"].active { background: #9A7D0A; color: #fff; }
+    .status-chip[data-s="EN PRÉPARATION"].active { background: #6C3483; }
+    .status-chip[data-s="CHARGÉ"].active         { background: #1E8449; }
+    .status-chip[data-s="LIVRAISON"].active      { background: #E67E22; }
+    .status-chip[data-s="REÇU / LIVRÉ"].active   { background: #5D6D7E; }
+
+    /* ── Table commandes ─────────────────────────────── */
+    .cmd-table-wrapper {
+      overflow-x: auto; border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .cmd-table {
+      width: 100%; border-collapse: collapse; font-size: 0.83rem;
+    }
+    .cmd-table th {
+      background: var(--surface2); color: var(--text-muted);
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; padding: 0.7rem 0.9rem; text-align: left;
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    .cmd-table td {
+      padding: 0.72rem 0.9rem; border-bottom: 1px solid var(--border);
+      vertical-align: middle; color: var(--text);
+    }
+    .cmd-table tr:last-child td { border-bottom: none; }
+    .cmd-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+    .td-fournisseur { font-weight: 600; font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
+    .td-cmd { font-family: monospace; font-size: 0.76rem; color: var(--text-muted); white-space: nowrap; }
+    .td-client { font-weight: 600; }
+    .td-date { font-size: 0.78rem; white-space: nowrap; }
+    .td-poids { font-size: 0.78rem; white-space: nowrap; text-align: right; }
+    .td-recept { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
+    .td-comment { font-size: 0.76rem; color: var(--text-muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @media (max-width: 900px) {
+      .col-enl, .col-delai, .col-comment { display: none; }
+    }
+    @media (max-width: 650px) {
+      .col-poids, .col-recept { display: none; }
+    }
+
+    /* ── Badge statut ────────────────────────────────── */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      border-radius: 999px; padding: 0.25rem 0.7rem;
+      font-size: 0.7rem; font-weight: 700; white-space: nowrap;
+      cursor: pointer; transition: var(--transition); border: none;
+      letter-spacing: 0.02em;
+    }
+    .status-badge:hover { filter: brightness(1.08); }
+    .badge-a-payer    { background: #FFF3E0; color: #B7440A; }
+    .badge-paye       { background: #EBF5FB; color: #1A5276; }
+    .badge-chargement { background: #FEF9E7; color: #9A7D0A; }
+    .badge-en-prep    { background: #F5EEF8; color: #6C3483; }
+    .badge-charge     { background: #EAFAF1; color: #1E8449; }
+    .badge-livraison  { background: #FEF5E7; color: #E67E22; }
+    .badge-recu       { background: #F4F6F7; color: #5D6D7E; }
+
+    /* ── Popup changement statut ─────────────────────── */
+    .status-popup {
+      position: fixed; z-index: 9999;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.5rem; box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+      display: none; min-width: 230px;
+    }
+    .status-popup.visible { display: block; }
+    .popup-title {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--text-muted); padding: 0.3rem 0.6rem 0.6rem; font-weight: 700;
+    }
+    .popup-option {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.5rem 0.7rem; border-radius: 8px; cursor: pointer;
+      font-size: 0.8rem; font-weight: 600; transition: var(--transition);
+    }
+    .popup-option:hover { background: var(--surface2); }
+    .popup-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .popup-close {
+      position: absolute; top: 6px; right: 8px;
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 1rem; line-height: 1;
+    }
+
+    /* ── Actions ─────────────────────────────────────── */
+    .td-actions { white-space: nowrap; }
+    .btn-edit, .btn-delete {
+      background: none; border: none; cursor: pointer;
+      padding: 0.3rem 0.5rem; border-radius: 6px;
+      font-size: 0.9rem; transition: var(--transition); color: var(--text-muted);
+    }
+    .btn-edit:hover   { background: var(--surface2); color: var(--or); }
+    .btn-delete:hover { background: rgba(226,92,92,0.1); color: #e25c5c; }
+
+    /* ── Zone vide ───────────────────────────────────── */
+    .cmd-empty {
+      text-align: center; padding: 3.5rem 1rem; color: var(--text-muted);
+    }
+    .cmd-empty-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+    .cmd-empty-text { font-size: 0.88rem; }
+
+    /* ── MODAL ───────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 1000; display: none; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--surface); border-radius: 16px;
+      width: 100%; max-width: 620px; max-height: 92vh;
+      overflow-y: auto; padding: 1.8rem; position: relative;
+    }
+    .modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.4rem; }
+    .modal-close {
+      position: absolute; top: 1.2rem; right: 1.2rem;
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 1.3rem; line-height: 1;
+    }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .modal-full { grid-column: 1 / -1; }
+    @media (max-width: 560px) { .modal-grid { grid-template-columns: 1fr; } }
+    .form-field label {
+      display: block; font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.35rem;
+      font-weight: 700;
+    }
+    .form-field input, .form-field select, .form-field textarea {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 0.62rem 0.9rem; border-radius: 8px;
+      font-size: 0.86rem; font-family: inherit; transition: var(--transition);
+    }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+      outline: none; border-color: var(--or);
+    }
+    .form-field textarea { resize: vertical; min-height: 62px; }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 0.8rem;
+      margin-top: 1.5rem; padding-top: 1.2rem;
+      border-top: 1px solid var(--border);
+    }
+    .btn-cancel {
+      background: none; border: 1px solid var(--border); color: var(--text-muted);
+      border-radius: 8px; padding: 0.65rem 1.3rem; font-size: 0.86rem; cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-cancel:hover { border-color: var(--text-muted); color: var(--text); }
+    .btn-save {
+      background: var(--or); color: var(--noir); border: none;
+      border-radius: 8px; padding: 0.65rem 1.6rem; font-size: 0.86rem;
+      font-weight: 700; cursor: pointer; transition: var(--transition);
+    }
+    .btn-save:hover { opacity: 0.85; }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Transport optimizer ─────────────────────────── */
+    .transport-section {
+      margin-top: 2.5rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+    }
+    .transport-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 1.4rem; cursor: pointer;
+      border-bottom: 1px solid transparent; transition: var(--transition);
+      user-select: none;
+    }
+    .transport-header:hover { background: var(--surface2); }
+    .transport-header.open { border-bottom-color: var(--border); }
+    .transport-header-left { display: flex; align-items: center; gap: 0.7rem; }
+    .transport-title { font-size: 0.95rem; font-weight: 700; }
+    .transport-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.1rem; }
+    .transport-chevron { color: var(--text-muted); transition: var(--transition); font-size: 0.85rem; }
+    .transport-header.open .transport-chevron { transform: rotate(180deg); }
+    .transport-body { display: none; padding: 1.4rem; }
+    .transport-body.open { display: block; }
+
+    .transport-controls {
+      display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.2rem; align-items: flex-end;
+    }
+    .transport-field label {
+      display: block; font-size: 0.68rem; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.3rem; font-weight: 700;
+    }
+    .transport-field select, .transport-field input {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 0.6rem 0.85rem; border-radius: 8px;
+      font-size: 0.85rem; font-family: inherit;
+    }
+    .transport-field select:focus, .transport-field input:focus { outline: none; border-color: var(--or); }
+    .transport-input-tarif { width: 120px; }
+    .transport-select-pays { min-width: 150px; }
+
+    .transport-table-wrap { overflow-x: auto; }
+    .transport-table {
+      width: 100%; border-collapse: collapse; font-size: 0.82rem;
+    }
+    .transport-table th {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--text-muted);
+      padding: 0.55rem 0.8rem; text-align: left;
+      background: var(--surface2); border-bottom: 1px solid var(--border);
+    }
+    .transport-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .transport-table tr:last-child td { border-bottom: none; }
+    .transport-table tr.selected td { background: rgba(212,175,55,0.07); }
+
+    .transport-cb { width: 17px; height: 17px; cursor: pointer; accent-color: var(--or); }
+    .transport-poids { font-weight: 700; text-align: right; }
+    .transport-totals {
+      display: flex; flex-wrap: wrap; gap: 1.2rem; margin-top: 1.2rem;
+      padding-top: 1.2rem; border-top: 1px solid var(--border);
+    }
+    .transport-total-card {
+      background: var(--surface2); border-radius: 10px;
+      padding: 0.9rem 1.3rem; flex: 1; min-width: 150px;
+    }
+    .transport-total-label {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--text-muted); font-weight: 700; margin-bottom: 0.3rem;
+    }
+    .transport-total-value {
+      font-size: 1.3rem; font-weight: 700; color: var(--text);
+    }
+    .transport-total-value.green { color: #2DC653; }
+    .transport-total-value.orange { color: #E67E22; }
+    .transport-total-value.blue { color: #2E86AB; }
+
+    /* ── Compteur résultats ──────────────────────────── */
+    .cmd-results-info {
+      font-size: 0.76rem; color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+
+    /* ── Fournisseur séparateur ──────────────────────── */
+    .fournisseur-row td {
+      background: var(--surface2) !important;
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--text-muted);
+      padding: 0.4rem 0.9rem; border-bottom: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-main">Maison Marcuzzi</div>
+      <span class="sidebar-logo-sub">Espace Équipe</span>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebarName">Chargement…</div>
+        <div class="sidebar-user-role" id="sidebarRole"></div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Demandes RDV</div>
+      <a href="dashboard.html" class="sidebar-link"><span>📅</span> Tableau de bord</a>
+      <div class="sidebar-section">Site web</div>
+      <a href="messages.html" class="sidebar-link"><span>💬</span> Messages de contact</a>
+      <a href="temoignages.html" class="sidebar-link"><span>⭐</span> Témoignages</a>
+      <div class="sidebar-section">Équipe</div>
+      <a href="pointage.html" class="sidebar-link"><span>🕐</span> Mon pointage</a>
+      <a href="conges.html" class="sidebar-link"><span>🏖️</span> Mes congés</a>
+      <a href="commandes.html" class="sidebar-link active"><span>📦</span> Commandes</a>
+      <a href="presence-equipe.html" class="sidebar-link" id="lienPresenceEquipe" style="display:none;">
+        <span>👥</span> Présence équipe
+      </a>
+    </nav>
+    <button class="sidebar-deconnexion" id="btnDeconnexion">Déconnexion</button>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="main-content">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+      <div>
+        <h2 style="margin:0 0 0.2rem;">📦 Suivi des commandes</h2>
+        <p style="margin:0;font-size:0.82rem;color:var(--text-muted);">Espagne · Italie · Portugal · Parquet · Sanitaire — mis à jour en temps réel</p>
+      </div>
+    </div>
+
+    <!-- Contrôles -->
+    <div class="cmd-controls">
+      <input type="search" id="searchClient" class="cmd-search"
+             placeholder="🔍  Rechercher un client, un fournisseur, un n° de commande…" />
+      <button class="btn-transport" id="btnToggleTransport">🚛 Optimisation transport</button>
+      <button class="btn-nouvelle" id="btnNouvelle">+ Nouvelle commande</button>
+    </div>
+
+    <!-- Onglets pays -->
+    <div class="cmd-tabs" id="cmdTabs">
+      <button class="cmd-tab active" data-pays="TOUS">Toutes <span class="cmd-tab-count" id="cnt-tous">0</span></button>
+      <button class="cmd-tab" data-pays="ESPAGNE">🇪🇸 Espagne <span class="cmd-tab-count" id="cnt-es">0</span></button>
+      <button class="cmd-tab" data-pays="ITALIE">🇮🇹 Italie <span class="cmd-tab-count" id="cnt-it">0</span></button>
+      <button class="cmd-tab" data-pays="PORTUGAL">🇵🇹 Portugal <span class="cmd-tab-count" id="cnt-pt">0</span></button>
+      <button class="cmd-tab" data-pays="PARQUET">🌲 Parquet <span class="cmd-tab-count" id="cnt-pq">0</span></button>
+      <button class="cmd-tab" data-pays="SANITAIRE">🚿 Sanitaire <span class="cmd-tab-count" id="cnt-sn">0</span></button>
+    </div>
+
+    <!-- Filtres statut -->
+    <div class="status-chips" id="statusChips">
+      <button class="status-chip active" data-s="TOUS">Tous</button>
+      <button class="status-chip" data-s="À PAYER AVANT PRÉPARATION">À payer</button>
+      <button class="status-chip" data-s="PAYÉ">Payé</button>
+      <button class="status-chip" data-s="DEMANDE DE CHARGEMENT">Demande chgt</button>
+      <button class="status-chip" data-s="EN PRÉPARATION">En préparation</button>
+      <button class="status-chip" data-s="CHARGÉ">Chargé</button>
+      <button class="status-chip" data-s="LIVRAISON">Livraison</button>
+      <button class="status-chip" data-s="REÇU / LIVRÉ">Reçu / livré</button>
+    </div>
+
+    <!-- Info résultats -->
+    <div class="cmd-results-info" id="resultsInfo"></div>
+
+    <!-- Table -->
+    <div class="cmd-table-wrapper">
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Fournisseur</th>
+            <th>N° commande</th>
+            <th>Client</th>
+            <th>Date chantier</th>
+            <th class="col-poids" style="text-align:right">Poids kg</th>
+            <th>Statut</th>
+            <th class="col-recept">Réception prév.</th>
+            <th class="col-comment">Commentaire</th>
+            <th class="col-enl col-delai">Enl. / Délai</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="cmdTableBody">
+          <tr><td colspan="10"><div class="cmd-empty"><div class="cmd-empty-icon">⏳</div><div class="cmd-empty-text">Chargement…</div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section Transport Optimizer -->
+    <div class="transport-section" id="transportSection" style="display:none;">
+      <div class="transport-header" id="transportHeader">
+        <div class="transport-header-left">
+          <span style="font-size:1.4rem;">🚛</span>
+          <div>
+            <div class="transport-title">Optimisation transport</div>
+            <div class="transport-subtitle">Composer un chargement — calcul automatique du poids et du coût</div>
+          </div>
+        </div>
+        <span class="transport-chevron">▼</span>
+      </div>
+      <div class="transport-body open" id="transportBody">
+        <div class="transport-controls">
+          <div class="transport-field">
+            <label>Pays du chargement</label>
+            <select id="tPays" class="transport-select-pays">
+              <option value="">Tous les pays</option>
+              <option value="ESPAGNE">🇪🇸 Espagne</option>
+              <option value="ITALIE">🇮🇹 Italie</option>
+              <option value="PORTUGAL">🇵🇹 Portugal</option>
+              <option value="PARQUET">🌲 Parquet</option>
+            </select>
+          </div>
+          <div class="transport-field">
+            <label>Tarif transport (€/kg)</label>
+            <input type="number" id="tTarif" class="transport-input-tarif" value="0.18" step="0.01" min="0" />
+          </div>
+          <div class="transport-field">
+            <label>Filtrer statut</label>
+            <select id="tStatut">
+              <option value="">Toutes commandes avec poids</option>
+              <option value="À PAYER AVANT PRÉPARATION">À payer avant préparation</option>
+              <option value="PAYÉ">Payé</option>
+              <option value="DEMANDE DE CHARGEMENT">Demande de chargement</option>
+              <option value="CHARGÉ">Chargé</option>
+            </select>
+          </div>
+        </div>
+        <div class="transport-table-wrap">
+          <table class="transport-table">
+            <thead>
+              <tr>
+                <th>✓</th>
+                <th>Pays</th>
+                <th>Fournisseur</th>
+                <th>Client</th>
+                <th>Date chantier</th>
+                <th>Statut</th>
+                <th style="text-align:right">Poids (kg)</th>
+              </tr>
+            </thead>
+            <tbody id="tBody"></tbody>
+          </table>
+        </div>
+        <div class="transport-totals">
+          <div class="transport-total-card">
+            <div class="transport-total-label">Commandes sélectionnées</div>
+            <div class="transport-total-value blue" id="tNbSelected">0</div>
+          </div>
+          <div class="transport-total-card">
+            <div class="transport-total-label">Poids total sélectionné</div>
+            <div class="transport-total-value green" id="tPoidsTotal">0 kg</div>
+          </div>
+          <div class="transport-total-card">
+            <div class="transport-total-label">Coût transport estimé</div>
+            <div class="transport-total-value orange" id="tCout">0,00 €</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- POPUP CHANGEMENT STATUT -->
+<div class="status-popup" id="statusPopup">
+  <div class="popup-title">Changer le statut</div>
+  <button class="popup-close" id="popupClose">✕</button>
+  <div id="popupOptions"></div>
+</div>
+
+<!-- MODAL AJOUT / ÉDITION -->
+<div class="modal-overlay" id="cmdModal">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle">Nouvelle commande</div>
+    <button class="modal-close" id="modalClose">✕</button>
+    <form id="cmdForm" autocomplete="off">
+      <input type="hidden" id="editId" />
+      <div class="modal-grid">
+        <div class="form-field">
+          <label>Pays *</label>
+          <select id="fPays" required>
+            <option value="">— Choisir —</option>
+            <option value="ESPAGNE">🇪🇸 Espagne</option>
+            <option value="ITALIE">🇮🇹 Italie</option>
+            <option value="PORTUGAL">🇵🇹 Portugal</option>
+            <option value="PARQUET">🌲 Parquet</option>
+            <option value="SANITAIRE">🚿 Sanitaire</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Fournisseur *</label>
+          <select id="fFournisseur" required>
+            <option value="">— Choisir le pays d'abord —</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>N° de commande</label>
+          <input type="text" id="fNumCmd" placeholder="AM02XXX, MAIL 01/06…" />
+        </div>
+        <div class="form-field">
+          <label>Client *</label>
+          <input type="text" id="fClient" required placeholder="Nom du client" />
+        </div>
+        <div class="form-field">
+          <label>Date chantier</label>
+          <input type="text" id="fDateChantier" placeholder="FIN JUIN, A CHARGER, URGENT…" />
+        </div>
+        <div class="form-field">
+          <label>Poids (kg)</label>
+          <input type="number" id="fPoids" step="0.01" min="0" placeholder="Ex: 1200" />
+        </div>
+        <div class="form-field">
+          <label>Statut</label>
+          <select id="fStatut">
+            <option value="À PAYER AVANT PRÉPARATION">À payer avant préparation</option>
+            <option value="PAYÉ">Payé</option>
+            <option value="DEMANDE DE CHARGEMENT">Demande de chargement</option>
+            <option value="EN PRÉPARATION">En préparation</option>
+            <option value="CHARGÉ">Chargé</option>
+            <option value="LIVRAISON">Livraison</option>
+            <option value="REÇU / LIVRÉ">Reçu / livré</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Réception prévisionnelle</label>
+          <input type="text" id="fRecept" placeholder="Ex: S27, 25/06, FIN JUIN…" />
+        </div>
+        <div class="form-field">
+          <label>N° enlèvement</label>
+          <input type="text" id="fEnl" />
+        </div>
+        <div class="form-field">
+          <label>Délai production</label>
+          <input type="text" id="fDelai" placeholder="Ex: SEMAINE 23" />
+        </div>
+        <div class="form-field modal-full">
+          <label>Commentaire</label>
+          <textarea id="fComment" placeholder="Informations complémentaires, notes importantes…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" id="modalCancel">Annuler</button>
+        <button type="submit" class="btn-save" id="modalSave">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toastContainer" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:0.5rem;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const SUPABASE_URL = 'https://hzploaweyewjyxdhpmvo.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_NfYsr2yMHIYRJ6F3H96EXg_KWZE4_RQ';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentProfile = null;
+let allCommandes    = [];
+let currentPays     = 'TOUS';
+let currentStatut   = 'TOUS';
+let currentSearch   = '';
+let activePopupId   = null;
+let isManager       = false;
+
+// ── Fournisseurs par pays ──────────────────────────────────────────
+const FOURNISSEURS = {
+  ESPAGNE:   ['AB','BATI-ORIENT','CERLAT','CRISTACER','FANAL','IBERO','MAINZU',
+               'NAVARTI','PAMESA','PDG','PERONDA / MUSEUM / HARMONY',
+               'PORCELANITEDOS','REVOIR PARIS','RIBESALBES','STOCK VERBIER MAPLE'],
+  ITALIE:    ['ALFALUX','ASTOR EDIMAX','CAESAR','CAPRI','CIR','COEM',
+               'FAP','FIORANESE','FLAVIKER','LATICRETE','RONDINE',
+               'SINTESI','SUPERGRES','TUSCANIA'],
+  PORTUGAL:  ['ALELUIA','DOMINO','KERION','LOVE','MARGRES / LOVE'],
+  PARQUET:   ['BERRY ALLOC','LAMETT','LMS'],
+  SANITAIRE: ['B10','HIDRONATUR','IRSAP','OTTOFOND','RELAX','TRES','VISOBATH'],
+};
+
+// ── Statuts ────────────────────────────────────────────────────────
+const STATUTS = [
+  { val:'À PAYER AVANT PRÉPARATION', cls:'badge-a-payer',    dot:'#E67E22' },
+  { val:'PAYÉ',                       cls:'badge-paye',       dot:'#2980B9' },
+  { val:'DEMANDE DE CHARGEMENT',      cls:'badge-chargement', dot:'#F1C40F' },
+  { val:'EN PRÉPARATION',             cls:'badge-en-prep',    dot:'#8E44AD' },
+  { val:'CHARGÉ',                     cls:'badge-charge',     dot:'#27AE60' },
+  { val:'LIVRAISON',                  cls:'badge-livraison',  dot:'#E67E22' },
+  { val:'REÇU / LIVRÉ',               cls:'badge-recu',       dot:'#95A5A6' },
+];
+const SHORT_LABELS = {
+  'À PAYER AVANT PRÉPARATION':'À PAYER','PAYÉ':'PAYÉ',
+  'DEMANDE DE CHARGEMENT':'CHARGEMENT','EN PRÉPARATION':'EN PRÉP.',
+  'CHARGÉ':'CHARGÉ','LIVRAISON':'LIVRAISON','REÇU / LIVRÉ':'REÇU',
+};
+function statusCls(val) {
+  const s = STATUTS.find(s => s.val === val);
+  return s ? s.cls : 'badge-recu';
+}
+function statusDot(val) {
+  const s = STATUTS.find(s => s.val === val);
+  return s ? s.dot : '#95A5A6';
+}
+
+// ── Toast ──────────────────────────────────────────────────────────
+function toast(msg, type='success') {
+  const el = document.createElement('div');
+  const colors = { success:'#1E8449', error:'#C0392B', info:'#1A5276' };
+  el.style.cssText = `background:${colors[type]||colors.success};color:#fff;padding:0.75rem 1.2rem;
+    border-radius:10px;font-size:0.84rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.3);
+    animation:fadeIn 0.2s ease;`;
+  el.textContent = msg;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+// ── Init ───────────────────────────────────────────────────────────
+async function init() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+
+  const { data: profile } = await db
+    .from('employee_profiles')
+    .select('*')
+    .eq('id', session.user.id)
+    .single();
+
+  if (!profile) { await db.auth.signOut(); window.location.href = '../login.html'; return; }
+  currentProfile = profile;
+  document.getElementById('sidebarName').textContent   = profile.prenom + ' ' + profile.nom;
+  document.getElementById('sidebarRole').textContent    = profile.poste;
+  document.getElementById('sidebarAvatar').textContent  = profile.prenom[0] + profile.nom[0];
+
+  isManager = (profile.poste === 'Dirigeant de la société' || profile.poste === 'Responsable magasin');
+  if (isManager) document.getElementById('lienPresenceEquipe').style.display = 'flex';
+
+  document.getElementById('btnDeconnexion').addEventListener('click', async () => {
+    await db.auth.signOut(); window.location.href = '../login.html';
+  });
+
+  await loadCommandes();
+
+  // Realtime
+  db.channel('commandes_rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'commandes' }, () => loadCommandes())
+    .subscribe();
+}
+
+// ── Chargement des commandes ───────────────────────────────────────
+async function loadCommandes() {
+  const { data, error } = await db.from('commandes').select('*').order('pays').order('fournisseur').order('created_at');
+  if (error) { console.error(error); return; }
+  allCommandes = data || [];
+  updateCounts();
+  renderTable();
+  renderTransport();
+}
+
+function updateCounts() {
+  const filtered = filterData(allCommandes);
+  document.getElementById('cnt-tous').textContent = allCommandes.filter(c => c.statut !== 'REÇU / LIVRÉ').length;
+  ['ESPAGNE','ITALIE','PORTUGAL','PARQUET','SANITAIRE'].forEach(pays => {
+    const key = { ESPAGNE:'es', ITALIE:'it', PORTUGAL:'pt', PARQUET:'pq', SANITAIRE:'sn' }[pays];
+    const n = allCommandes.filter(c => c.pays === pays && c.statut !== 'REÇU / LIVRÉ').length;
+    const el = document.getElementById('cnt-' + key);
+    if (el) el.textContent = n;
+  });
+}
+
+// ── Filtrage ───────────────────────────────────────────────────────
+function filterData(data) {
+  return data.filter(c => {
+    if (currentPays !== 'TOUS' && c.pays !== currentPays) return false;
+    if (currentStatut !== 'TOUS' && c.statut !== currentStatut) return false;
+    if (currentSearch) {
+      const q = currentSearch.toLowerCase();
+      return (c.client||'').toLowerCase().includes(q)
+          || (c.fournisseur||'').toLowerCase().includes(q)
+          || (c.numero_commande||'').toLowerCase().includes(q)
+          || (c.commentaire||'').toLowerCase().includes(q);
+    }
+    return true;
+  });
+}
+
+// ── Rendu table ────────────────────────────────────────────────────
+function renderTable() {
+  const tbody = document.getElementById('cmdTableBody');
+  let data = filterData(allCommandes);
+
+  // Ne pas montrer "REÇU / LIVRÉ" par défaut sauf si filtre explicite
+  if (currentStatut === 'TOUS') data = data.filter(c => c.statut !== 'REÇU / LIVRÉ');
+
+  document.getElementById('resultsInfo').textContent =
+    data.length === 0 ? '' :
+    `${data.length} commande${data.length > 1 ? 's' : ''} affichée${data.length > 1 ? 's' : ''}` +
+    (currentStatut === 'TOUS' ? ' (commandes reçues masquées)' : '');
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="cmd-empty">
+      <div class="cmd-empty-icon">📭</div>
+      <div class="cmd-empty-text">Aucune commande trouvée</div>
+    </div></td></tr>`;
+    return;
+  }
+
+  let html = '';
+  let lastFournisseur = '';
+
+  data.forEach(c => {
+    const key = c.pays + '::' + c.fournisseur;
+    if (key !== lastFournisseur) {
+      lastFournisseur = key;
+      const flag = {ESPAGNE:'🇪🇸',ITALIE:'🇮🇹',PORTUGAL:'🇵🇹',PARQUET:'🌲',SANITAIRE:'🚿'}[c.pays]||'';
+      html += `<tr class="fournisseur-row"><td colspan="10">${flag} ${c.fournisseur}</td></tr>`;
+    }
+
+    const sc = statusCls(c.statut);
+    const shortLabel = SHORT_LABELS[c.statut] || c.statut;
+    const poidsStr = c.poids_kg ? Number(c.poids_kg).toLocaleString('fr-FR') + ' kg' : '—';
+    const deleteBtn = isManager
+      ? `<button class="btn-delete" onclick="deleteCmd('${c.id}')" title="Supprimer">🗑</button>`
+      : '';
+
+    html += `<tr>
+      <td class="td-fournisseur">${esc(c.fournisseur)}</td>
+      <td class="td-cmd">${esc(c.numero_commande||'—')}</td>
+      <td class="td-client">${esc(c.client||'—')}</td>
+      <td class="td-date">${esc(c.date_chantier||'—')}</td>
+      <td class="td-poids col-poids">${poidsStr}</td>
+      <td>
+        <button class="status-badge ${sc}" onclick="openStatusPopup('${c.id}','${c.statut}',this)">
+          ${shortLabel}
+        </button>
+      </td>
+      <td class="td-recept col-recept">${esc(c.reception_prev||'—')}</td>
+      <td class="td-comment col-comment" title="${esc(c.commentaire||'')}">${esc(c.commentaire||'—')}</td>
+      <td class="col-enl col-delai" style="font-size:0.72rem;color:var(--text-muted);">
+        ${c.numero_enlevement ? '✈ ' + esc(c.numero_enlevement) : ''}
+        ${c.delai_prod ? '<br>⏱ ' + esc(c.delai_prod) : ''}
+      </td>
+      <td class="td-actions">
+        <button class="btn-edit" onclick="openEdit('${c.id}')" title="Modifier">✏️</button>
+        ${deleteBtn}
+      </td>
+    </tr>`;
+  });
+
+  tbody.innerHTML = html;
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Popup statut ───────────────────────────────────────────────────
+function openStatusPopup(id, currentStatus, badgeEl) {
+  activePopupId = id;
+  const popup = document.getElementById('statusPopup');
+  const opts = document.getElementById('popupOptions');
+  opts.innerHTML = STATUTS.map(s => `
+    <div class="popup-option${s.val === currentStatus ? ' selected' : ''}"
+         onclick="changeStatut('${id}','${s.val}')">
+      <span class="popup-dot" style="background:${s.dot}"></span>
+      <span>${s.val}</span>
+      ${s.val === currentStatus ? '<span style="margin-left:auto;color:var(--or);">✓</span>' : ''}
+    </div>`).join('');
+
+  const rect = badgeEl.getBoundingClientRect();
+  const top = Math.min(rect.bottom + 6 + window.scrollY, window.scrollY + window.innerHeight - 340);
+  const left = Math.min(rect.left + window.scrollX, window.scrollX + window.innerWidth - 250);
+  popup.style.top  = top + 'px';
+  popup.style.left = left + 'px';
+  popup.classList.add('visible');
+}
+
+document.getElementById('popupClose').addEventListener('click', () => {
+  document.getElementById('statusPopup').classList.remove('visible');
+});
+document.addEventListener('click', e => {
+  const popup = document.getElementById('statusPopup');
+  if (popup.classList.contains('visible')
+      && !popup.contains(e.target)
+      && !e.target.classList.contains('status-badge')) {
+    popup.classList.remove('visible');
+  }
+});
+
+async function changeStatut(id, newStatut) {
+  document.getElementById('statusPopup').classList.remove('visible');
+  const { error } = await db.from('commandes').update({
+    statut: newStatut,
+    updated_by_name: currentProfile.prenom + ' ' + currentProfile.nom,
+  }).eq('id', id);
+  if (error) { toast('Erreur lors de la mise à jour', 'error'); return; }
+  toast('Statut mis à jour ✓');
+}
+
+// ── Supprimer ──────────────────────────────────────────────────────
+async function deleteCmd(id) {
+  if (!confirm('Supprimer cette commande ? Cette action est irréversible.')) return;
+  const { error } = await db.from('commandes').delete().eq('id', id);
+  if (error) { toast('Erreur lors de la suppression', 'error'); return; }
+  toast('Commande supprimée');
+}
+
+// ── Modal ajout / édition ──────────────────────────────────────────
+const modal    = document.getElementById('cmdModal');
+const fPays    = document.getElementById('fPays');
+const fFour    = document.getElementById('fFournisseur');
+
+fPays.addEventListener('change', () => updateFournisseurSelect(fPays.value));
+
+function updateFournisseurSelect(pays, currentVal) {
+  const list = FOURNISSEURS[pays] || [];
+  fFour.innerHTML = '<option value="">— Choisir —</option>'
+    + list.map(f => `<option value="${f}"${f === currentVal ? ' selected' : ''}>${f}</option>`).join('');
+}
+
+document.getElementById('btnNouvelle').addEventListener('click', () => openModal());
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalCancel').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+function openModal(cmd) {
+  document.getElementById('editId').value     = cmd ? cmd.id : '';
+  document.getElementById('modalTitle').textContent = cmd ? 'Modifier la commande' : 'Nouvelle commande';
+  document.getElementById('fPays').value      = cmd ? cmd.pays : '';
+  updateFournisseurSelect(cmd ? cmd.pays : '', cmd ? cmd.fournisseur : '');
+  document.getElementById('fNumCmd').value    = cmd ? (cmd.numero_commande||'') : '';
+  document.getElementById('fClient').value    = cmd ? (cmd.client||'') : '';
+  document.getElementById('fDateChantier').value = cmd ? (cmd.date_chantier||'') : '';
+  document.getElementById('fPoids').value     = cmd ? (cmd.poids_kg||'') : '';
+  document.getElementById('fStatut').value    = cmd ? cmd.statut : 'À PAYER AVANT PRÉPARATION';
+  document.getElementById('fRecept').value    = cmd ? (cmd.reception_prev||'') : '';
+  document.getElementById('fEnl').value       = cmd ? (cmd.numero_enlevement||'') : '';
+  document.getElementById('fDelai').value     = cmd ? (cmd.delai_prod||'') : '';
+  document.getElementById('fComment').value   = cmd ? (cmd.commentaire||'') : '';
+  modal.classList.add('open');
+}
+
+function closeModal() { modal.classList.remove('open'); }
+
+function openEdit(id) {
+  const cmd = allCommandes.find(c => c.id === id);
+  if (cmd) openModal(cmd);
+}
+
+document.getElementById('cmdForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('modalSave');
+  btn.disabled = true;
+  btn.textContent = 'Enregistrement…';
+
+  const id     = document.getElementById('editId').value;
+  const pays   = document.getElementById('fPays').value;
+  const four   = document.getElementById('fFournisseur').value;
+  const client = document.getElementById('fClient').value.trim();
+
+  if (!pays || !four || !client) {
+    toast('Pays, fournisseur et client sont obligatoires', 'error');
+    btn.disabled = false; btn.textContent = 'Enregistrer'; return;
+  }
+
+  const payload = {
+    pays, fournisseur: four,
+    numero_commande:   document.getElementById('fNumCmd').value.trim() || null,
+    client,
+    date_chantier:     document.getElementById('fDateChantier').value.trim() || null,
+    poids_kg:          parseFloat(document.getElementById('fPoids').value) || null,
+    statut:            document.getElementById('fStatut').value,
+    reception_prev:    document.getElementById('fRecept').value.trim() || null,
+    numero_enlevement: document.getElementById('fEnl').value.trim() || null,
+    delai_prod:        document.getElementById('fDelai').value.trim() || null,
+    commentaire:       document.getElementById('fComment').value.trim() || null,
+    updated_by_name:   currentProfile.prenom + ' ' + currentProfile.nom,
+  };
+
+  let error;
+  if (id) {
+    ({ error } = await db.from('commandes').update(payload).eq('id', id));
+  } else {
+    payload.created_by      = currentProfile.id;
+    payload.created_by_name = currentProfile.prenom + ' ' + currentProfile.nom;
+    ({ error } = await db.from('commandes').insert(payload));
+  }
+
+  btn.disabled = false; btn.textContent = 'Enregistrer';
+  if (error) { toast('Erreur : ' + error.message, 'error'); return; }
+  toast(id ? 'Commande mise à jour ✓' : 'Commande ajoutée ✓');
+  closeModal();
+});
+
+// ── Onglets pays ───────────────────────────────────────────────────
+document.getElementById('cmdTabs').addEventListener('click', e => {
+  const tab = e.target.closest('.cmd-tab');
+  if (!tab) return;
+  document.querySelectorAll('.cmd-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  currentPays = tab.dataset.pays;
+  renderTable();
+});
+
+// ── Filtres statut ─────────────────────────────────────────────────
+document.getElementById('statusChips').addEventListener('click', e => {
+  const chip = e.target.closest('.status-chip');
+  if (!chip) return;
+  document.querySelectorAll('.status-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  currentStatut = chip.dataset.s;
+  renderTable();
+});
+
+// ── Recherche ──────────────────────────────────────────────────────
+let searchTimer;
+document.getElementById('searchClient').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    currentSearch = e.target.value.trim();
+    renderTable();
+  }, 200);
+});
+
+// ── Transport optimizer ────────────────────────────────────────────
+document.getElementById('btnToggleTransport').addEventListener('click', () => {
+  const section = document.getElementById('transportSection');
+  const isVisible = section.style.display !== 'none';
+  section.style.display = isVisible ? 'none' : 'block';
+  if (!isVisible) section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+document.getElementById('transportHeader').addEventListener('click', () => {
+  const header = document.getElementById('transportHeader');
+  const body   = document.getElementById('transportBody');
+  header.classList.toggle('open');
+  body.classList.toggle('open');
+});
+document.getElementById('transportHeader').classList.add('open');
+
+['tPays','tStatut'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderTransport);
+});
+document.getElementById('tTarif').addEventListener('input', updateTransportTotals);
+
+function renderTransport() {
+  const pays   = document.getElementById('tPays').value;
+  const statut = document.getElementById('tStatut').value;
+
+  let data = allCommandes.filter(c => c.poids_kg && c.poids_kg > 0);
+  if (pays)   data = data.filter(c => c.pays === pays);
+  if (statut) data = data.filter(c => c.statut === statut);
+  data = data.filter(c => c.statut !== 'REÇU / LIVRÉ');
+
+  const tbody = document.getElementById('tBody');
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:1.5rem;font-size:0.82rem;">
+      Aucune commande avec poids pour ces critères</td></tr>`;
+    updateTransportTotals();
+    return;
+  }
+
+  const flag = {ESPAGNE:'🇪🇸',ITALIE:'🇮🇹',PORTUGAL:'🇵🇹',PARQUET:'🌲',SANITAIRE:'🚿'};
+  tbody.innerHTML = data.map((c,i) => `
+    <tr id="trow-${c.id}">
+      <td><input type="checkbox" class="transport-cb" id="tcb-${c.id}"
+           onchange="updateTransportTotals()" /></td>
+      <td style="font-size:0.8rem;">${flag[c.pays]||''} ${c.pays}</td>
+      <td style="font-size:0.8rem;font-weight:600;">${esc(c.fournisseur)}</td>
+      <td style="font-weight:600;">${esc(c.client||'—')}</td>
+      <td style="font-size:0.78rem;color:var(--text-muted);">${esc(c.date_chantier||'—')}</td>
+      <td><span class="status-badge ${statusCls(c.statut)}" style="cursor:default;pointer-events:none;">${SHORT_LABELS[c.statut]||c.statut}</span></td>
+      <td class="transport-poids">${Number(c.poids_kg).toLocaleString('fr-FR')} kg</td>
+    </tr>`).join('');
+
+  updateTransportTotals();
+}
+
+function updateTransportTotals() {
+  const tarif = parseFloat(document.getElementById('tTarif').value) || 0;
+  let totalPoids = 0, totalNb = 0;
+  document.querySelectorAll('.transport-cb').forEach(cb => {
+    if (cb.checked) {
+      const id = cb.id.replace('tcb-','');
+      const cmd = allCommandes.find(c => c.id === id);
+      if (cmd && cmd.poids_kg) { totalPoids += Number(cmd.poids_kg); totalNb++; }
+      document.getElementById('trow-' + id)?.classList.add('selected');
+    } else {
+      const id = cb.id.replace('tcb-','');
+      document.getElementById('trow-' + id)?.classList.remove('selected');
+    }
+  });
+  document.getElementById('tNbSelected').textContent  = totalNb;
+  document.getElementById('tPoidsTotal').textContent  = totalPoids.toLocaleString('fr-FR') + ' kg';
+  document.getElementById('tCout').textContent        = (totalPoids * tarif).toLocaleString('fr-FR', { minimumFractionDigits:2, maximumFractionDigits:2 }) + ' €';
+}
+
+init();
+</script>
+</body>
+</html>
