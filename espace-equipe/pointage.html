@@ -278,7 +278,15 @@ async function loadToday() {
     .eq('date', todayStr())
     .maybeSingle();
 
-  if (error) { showToast('Erreur de chargement du pointage', 'error'); return; }
+  if (error) {
+    console.error('Erreur pointage:', error);
+    document.getElementById('clockStatus').textContent = 'Erreur de connexion';
+    document.getElementById('clockSteps').innerHTML =
+      `<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:1rem;">
+        Impossible de charger le pointage.<br>Vérifiez votre connexion ou contactez l'administrateur.
+      </p>`;
+    return;
+  }
   todayRecord = data;
   renderSteps();
 }
