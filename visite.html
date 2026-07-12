@@ -7,98 +7,207 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <style>
-:root { --or:#C9A96E; --txt:#F0EBE1; }
+:root{--or:#C9A96E;--txt:#F0EBE1}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;overflow-x:hidden;cursor:none}
-body{background:#060402;font-family:Georgia,'Times New Roman',serif;color:var(--txt);-webkit-font-smoothing:antialiased}
+html,body{width:100%;overflow-x:hidden;cursor:none;background:#070A0D}
+body{font-family:Georgia,'Times New Roman',serif;color:var(--txt);-webkit-font-smoothing:antialiased}
 
-/* ── CURSOR ── */
-#cr{position:fixed;width:46px;height:46px;border:1px solid rgba(201,169,110,.55);border-radius:50%;pointer-events:none;z-index:9999;top:0;left:0;will-change:transform}
+/* CURSOR */
+#cr{position:fixed;width:46px;height:46px;border:1px solid rgba(201,169,110,.5);border-radius:50%;pointer-events:none;z-index:9999;top:0;left:0;will-change:transform;transition:width .35s,height .35s}
 #cd{position:fixed;width:5px;height:5px;background:var(--or);border-radius:50%;pointer-events:none;z-index:9999;top:0;left:0;will-change:transform}
 
-/* ── PROGRESS ── */
-#pb{position:fixed;top:0;left:0;height:1.5px;width:100%;background:var(--or);transform-origin:left;transform:scaleX(0);z-index:400;pointer-events:none}
+/* PROGRESS */
+#pb{position:fixed;top:0;left:0;height:1.5px;width:100%;background:var(--or);transform-origin:left;transform:scaleX(0);z-index:500}
 
-/* ── LOGO ── */
-#logo{position:fixed;top:30px;left:38px;z-index:400;pointer-events:none;mix-blend-mode:normal}
-#logo-name{display:block;font-size:.95rem;letter-spacing:.2em;text-transform:uppercase;font-weight:normal;color:var(--txt);line-height:1}
-#logo-sub{display:block;font-size:.52rem;letter-spacing:.28em;text-transform:uppercase;color:var(--or);margin-top:5px;font-family:system-ui,sans-serif}
+/* LOGO */
+#logo{position:fixed;top:28px;left:36px;z-index:500;pointer-events:none}
+#logo b{display:block;font-size:.95rem;letter-spacing:.2em;text-transform:uppercase;font-weight:normal;color:var(--txt)}
+#logo em{display:block;font-style:normal;font-size:.52rem;letter-spacing:.28em;text-transform:uppercase;color:var(--or);margin-top:5px;font-family:system-ui,sans-serif}
 
-/* ── COUNTER ── */
-#ctr{position:fixed;top:33px;right:52px;z-index:400;font-family:system-ui,sans-serif;font-size:.58rem;letter-spacing:.16em;color:rgba(201,169,110,.65);pointer-events:none;opacity:0;transition:opacity .5s}
+/* COUNTER */
+#ctr{position:fixed;top:31px;right:50px;z-index:500;font-family:system-ui,sans-serif;font-size:.58rem;letter-spacing:.16em;color:rgba(201,169,110,.6);pointer-events:none;opacity:0;transition:opacity .5s}
 
-/* ── NAV DOTS ── */
-#ndots{position:fixed;right:24px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:400}
-.nd{width:4px;height:4px;border-radius:50%;background:rgba(201,169,110,.22);border:1px solid rgba(201,169,110,.28);cursor:none;transition:all .4s ease}
-.nd.on{background:var(--or);border-color:var(--or);box-shadow:0 0 8px rgba(201,169,110,.5)}
+/* DOTS */
+#dots{position:fixed;right:22px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:500}
+.dot{width:4px;height:4px;border-radius:50%;background:rgba(201,169,110,.2);border:1px solid rgba(201,169,110,.28);cursor:none;transition:all .4s}
+.dot.on{background:var(--or);border-color:var(--or);box-shadow:0 0 8px rgba(201,169,110,.5)}
 
-/* ── SCENE INFO ── */
-#info{position:fixed;bottom:46px;left:0;right:52px;padding:0 38px;display:flex;justify-content:space-between;align-items:flex-end;z-index:400;pointer-events:none}
-#rname{font-size:clamp(2rem,5.5vw,4.2rem);font-weight:normal;letter-spacing:.04em;color:var(--txt);opacity:0;transform:translateY(26px);transition:opacity .75s ease,transform .75s ease;line-height:1.05}
+/* SCROLL HINT */
+#hint{position:fixed;bottom:44px;left:50%;transform:translateX(-50%);text-align:center;z-index:500;pointer-events:none;transition:opacity .6s}
+#hint p{font-family:system-ui,sans-serif;font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(201,169,110,.5);margin-bottom:12px}
+.hl{width:1px;height:36px;background:linear-gradient(180deg,rgba(201,169,110,.7) 0%,transparent 100%);margin:0 auto;animation:hla 2.2s ease-in-out infinite}
+@keyframes hla{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(7px)}}
+
+/* SCENE INFO */
+#info{position:fixed;bottom:44px;left:0;right:50px;padding:0 36px;display:flex;justify-content:space-between;align-items:flex-end;z-index:500;pointer-events:none}
+#rname{font-size:clamp(2rem,5.5vw,4rem);font-weight:normal;letter-spacing:.04em;opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s ease;line-height:1.05}
 #rname.vis{opacity:1;transform:translateY(0)}
 #mside{display:flex;flex-direction:column;align-items:flex-end;gap:10px;pointer-events:all}
-#mtag{font-family:system-ui,sans-serif;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--or);opacity:0;transform:translateY(10px);transition:opacity .7s ease .18s,transform .7s ease .18s}
+#mtag{font-family:system-ui,sans-serif;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--or);opacity:0;transform:translateY(10px);transition:opacity .7s ease .2s,transform .7s ease .2s}
 #mtag.vis{opacity:1;transform:translateY(0)}
-#xbtn{padding:11px 24px;border:1px solid rgba(201,169,110,.4);background:rgba(6,4,2,.5);color:var(--or);font-family:system-ui,sans-serif;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;cursor:none;opacity:0;transform:translateY(10px);transition:opacity .7s ease .32s,transform .7s ease .32s,background .25s,border-color .25s;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#xbtn{padding:11px 24px;border:1px solid rgba(201,169,110,.4);background:rgba(7,10,13,.55);color:var(--or);font-family:system-ui,sans-serif;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;cursor:none;opacity:0;transform:translateY(10px);transition:opacity .7s ease .35s,transform .7s ease .35s,background .25s,border-color .25s;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 #xbtn.vis{opacity:1;transform:translateY(0)}
-#xbtn:hover{background:rgba(201,169,110,.13);border-color:var(--or)}
+#xbtn:hover{background:rgba(201,169,110,.12);border-color:var(--or)}
 
-/* ── SCROLL HINT ── */
-#hint{position:fixed;bottom:46px;left:50%;transform:translateX(-50%);text-align:center;z-index:400;pointer-events:none;transition:opacity .6s}
-#hint p{font-family:system-ui,sans-serif;font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(201,169,110,.52);margin-bottom:12px}
-.hl{width:1px;height:38px;background:linear-gradient(180deg,rgba(201,169,110,.7) 0%,transparent 100%);margin:0 auto;animation:hla 2.2s ease-in-out infinite}
-@keyframes hla{0%,100%{opacity:.28;transform:translateY(0)}50%{opacity:1;transform:translateY(7px)}}
-
-/* ── HERO CONTENT ── */
-.hero{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3;pointer-events:none}
-.hero h1{font-size:clamp(3rem,8vw,6.5rem);font-weight:normal;letter-spacing:.22em;text-transform:uppercase;text-align:center;line-height:.95;text-wrap:balance}
-.hero p{font-family:system-ui,sans-serif;font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--or);margin-top:22px}
-.hero-line{width:50px;height:1px;background:var(--or);margin:20px auto 0;opacity:.5}
-
-/* ── SCROLL TRACK ── */
-#track{height:900vh;position:relative}
+/* SCROLL TRACK */
+#track{height:1000vh;position:relative}
 #stage{position:sticky;top:0;height:100vh;overflow:hidden}
 
-/* ── SCENES ── */
+/* ALL SCENES */
 .scene{position:absolute;inset:0;opacity:0;overflow:hidden;will-change:opacity}
-.si{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;will-change:transform}
-.ov{position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,rgba(6,4,2,.18) 0%,rgba(6,4,2,.08) 45%,rgba(6,4,2,.65) 100%)}
-#s0 .ov{background:radial-gradient(ellipse at center,rgba(6,4,2,.28) 0%,rgba(6,4,2,.6) 100%)}
 
-/* Mobile */
-@media(max-width:700px){
-  .hero h1{font-size:2.4rem}
-  #rname{font-size:1.8rem}
-  #info{right:0;padding:0 22px}
-  #ndots{right:8px}
-  #logo{left:20px}
+/* ════════════════════════════
+   SCENE 0 — VUE AÉRIENNE
+════════════════════════════ */
+#s-aerial{background:radial-gradient(ellipse at 50% 40%,#0D1520 0%,#060A0E 60%,#030508 100%)}
+
+/* Wrapper for the 3D camera perspective */
+#aerial-perspective{
+  position:absolute;inset:0;
+  perspective:1000px;
+  perspective-origin:50% 75%;
+  display:flex;align-items:center;justify-content:center;
 }
+#aerial-content{
+  position:relative;
+  will-change:transform;
+  transform-origin:50% 72%;
+}
+
+/* Stars */
+#stars{position:absolute;inset:0;pointer-events:none}
+
+/* ════════════════════════════
+   SCENE 1 — HALL D'ENTRÉE
+════════════════════════════ */
+#s-hall{background:linear-gradient(180deg,#E5DFD3 0%,#CEC8BC 100%)}
+
+.hall-ceil{position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg,#EAE4D8 0%,#D8D2C6 100%)}
+.hall-vp-l{position:absolute;top:0;left:0;bottom:0;width:22%;background:linear-gradient(90deg,#C0BAB0 0%,#D8D2C6 100%);clip-path:polygon(0 0,100% 18%,100% 82%,0 100%)}
+.hall-vp-r{position:absolute;top:0;right:0;bottom:0;width:22%;background:linear-gradient(270deg,#C0BAB0 0%,#D8D2C6 100%);clip-path:polygon(0 18%,100% 0,100% 100%,0 82%)}
+.hall-back{position:absolute;top:18%;left:22%;right:22%;bottom:20%;background:linear-gradient(180deg,#E8E2D6 0%,#DEDAD0 100%)}
+.hall-arch{position:absolute;top:20%;left:50%;transform:translateX(-50%);width:200px;height:250px;border:2px solid rgba(150,142,130,.35);border-bottom:none;border-radius:100px 100px 0 0}
+.hall-col{position:absolute;top:18%;width:14px;background:linear-gradient(90deg,#C8C2B8 0%,#E8E2D6 50%,#C8C2B8 100%);bottom:20%}
+.hall-col.l{left:22%}.hall-col.r{right:22%}
+.hall-dado{position:absolute;bottom:20%;left:22%;right:22%;height:28%;background:linear-gradient(180deg,#D8D2C6 0%,#C8C2B6 100%);border-top:2.5px solid rgba(150,142,130,.35)}
+.hall-ch-rod{position:absolute;top:0;left:50%;width:1.5px;height:60px;background:linear-gradient(180deg,transparent,rgba(160,150,135,.5));transform:translateX(-50%)}
+.hall-ch-glow{position:absolute;top:56px;left:50%;transform:translateX(-50%);width:120px;height:70px;background:radial-gradient(ellipse,rgba(255,215,120,.25) 0%,transparent 70%);border-radius:50%}
+.hall-door{position:absolute;bottom:20%;left:50%;transform:translateX(-50%);width:70px;height:100px;background:linear-gradient(180deg,#2A2018 0%,#201A12 100%);border-top:none}
+.hall-door-top{position:absolute;bottom:calc(20% + 100px);left:50%;transform:translateX(-50%);width:70px;height:12px;background:#241E16;border-radius:35px 35px 0 0}
+.hall-floor{position:absolute;bottom:0;left:-80%;width:260%;height:68%;transform:perspective(700px) rotateX(58deg);transform-origin:bottom center;background:repeating-conic-gradient(#C8BDB0 0% 25%,#1A1510 0% 50%) 0 0/100px 100px}
+
+/* ════════════════════════════
+   SCENE 2 — SALON
+════════════════════════════ */
+#s-salon{background:linear-gradient(180deg,#1A1208 0%,#0E0A04 100%)}
+.salon-vp-l{position:absolute;inset:0;width:26%;background:linear-gradient(90deg,#0A0602 0%,#1C1408 100%);clip-path:polygon(0 0,100% 12%,100% 88%,0 100%)}
+.salon-vp-r{position:absolute;top:0;right:0;bottom:0;width:22%;background:linear-gradient(270deg,#0A0602 0%,#1A1208 100%);clip-path:polygon(0 12%,100% 0,100% 100%,0 88%)}
+.salon-ceil{position:absolute;top:0;left:26%;right:22%;height:14%;background:linear-gradient(180deg,#231A0C 0%,#1A1208 100%)}
+.salon-fp-wrap{position:absolute;right:14%;bottom:33%;width:120px}
+.salon-fp{position:relative;width:120px;height:140px;background:#171008;border:3px solid #221A0E;border-radius:2px 2px 0 0}
+.salon-fp-hole{position:absolute;bottom:0;left:14px;right:14px;height:65%;background:#0A0602;border-radius:22px 22px 0 0}
+.salon-fp-glow{position:absolute;bottom:33%;right:8%;width:240px;height:240px;background:radial-gradient(ellipse at 72% 100%,rgba(255,110,20,.22) 0%,rgba(255,60,10,.07) 40%,transparent 70%);animation:flkr 3.5s ease-in-out infinite}
+@keyframes flkr{0%,100%{opacity:.8}42%{opacity:1}68%{opacity:.55}}
+.salon-sofa{position:absolute;bottom:33%;left:18%;width:220px;height:48px;background:linear-gradient(180deg,#2A2018 0%,#1E1810 100%);border-radius:4px 4px 0 0}
+.salon-sofa::before{content:'';position:absolute;top:-24px;left:0;right:0;height:24px;background:linear-gradient(180deg,#322818 0%,#2A2018 100%);border-radius:4px 4px 0 0}
+.salon-floor{position:absolute;bottom:0;left:-80%;width:260%;height:68%;transform:perspective(700px) rotateX(58deg);transform-origin:bottom center;background:repeating-linear-gradient(45deg,#8A5C34 0px,#8A5C34 14px,#7A4E28 14px,#7A4E28 28px),repeating-linear-gradient(-45deg,rgba(0,0,0,.12) 0px,rgba(0,0,0,.12) 14px,transparent 14px,transparent 28px)}
+
+/* ════════════════════════════
+   SCENE 3 — CUISINE
+════════════════════════════ */
+#s-cuisine{background:linear-gradient(180deg,#F0EBE4 0%,#E5E0D8 100%)}
+.c-vp-l{position:absolute;inset:0;width:18%;background:linear-gradient(90deg,#D5D0C8 0%,#E8E3DC 100%);clip-path:polygon(0 0,100% 10%,100% 90%,0 100%)}
+.c-vp-r{position:absolute;top:0;right:0;bottom:0;width:18%;background:linear-gradient(270deg,#D5D0C8 0%,#E8E3DC 100%);clip-path:polygon(0 10%,100% 0,100% 100%,0 90%)}
+.c-upper{position:absolute;top:8%;left:18%;right:18%;height:120px;background:linear-gradient(180deg,#2E2C24 0%,#262418 100%);display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:2px}
+.c-panel{background:linear-gradient(180deg,#322E26 0%,#2A2820 100%);border-top:1px solid rgba(255,255,255,.055)}
+.c-back{position:absolute;top:calc(8% + 122px);left:18%;right:18%;bottom:calc(30% + 20px);background:repeating-linear-gradient(0deg,rgba(0,0,0,.055) 0px,rgba(0,0,0,.055) 1px,transparent 1px,transparent 75px),repeating-linear-gradient(90deg,rgba(0,0,0,.04) 0px,rgba(0,0,0,.04) 1px,transparent 1px,transparent 120px),linear-gradient(180deg,#EEEAE2 0%,#E4E0D6 100%)}
+.c-cabs{position:absolute;bottom:30%;left:0;right:0;height:60px;background:linear-gradient(180deg,#2E2C24 0%,#222018 100%)}
+.c-ctr{position:absolute;bottom:30%;left:0;right:0;height:18px;background:linear-gradient(180deg,#E0D8CC 0%,#CEC8BC 100%);border-top:2.5px solid #B8B0A4;z-index:2}
+.c-floor{position:absolute;bottom:0;left:-80%;width:260%;height:65%;transform:perspective(700px) rotateX(58deg);transform-origin:bottom center;background:repeating-conic-gradient(#D4D0CA 0% 25%,#BEB8B0 0% 50%) 0 0/80px 80px}
+
+/* ════════════════════════════
+   SCENE 4 — SALLE DE BAIN
+════════════════════════════ */
+#s-sdb{background:linear-gradient(180deg,#121C24 0%,#0A1620 100%)}
+.sdb-vp-l{position:absolute;inset:0;width:20%;background:linear-gradient(90deg,#080E14 0%,#121C24 100%);clip-path:polygon(0 0,100% 12%,100% 88%,0 100%)}
+.sdb-vp-r{position:absolute;top:0;right:0;bottom:0;width:20%;background:linear-gradient(270deg,#080E14 0%,#121C24 100%);clip-path:polygon(0 12%,100% 0,100% 100%,0 88%)}
+.sdb-top-bar{position:absolute;top:0;left:50%;transform:translateX(-50%);width:220px;height:6px;background:rgba(255,240,215,.9);box-shadow:0 0 50px 18px rgba(255,230,200,.35)}
+.sdb-mirror{position:absolute;top:7%;left:50%;transform:translateX(-50%);width:200px;height:250px;background:linear-gradient(135deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,.02) 100%);border:1px solid rgba(255,255,255,.07)}
+.sdb-mirror::after{content:'';position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg,rgba(255,240,210,.06) 0%,transparent 100%)}
+.sdb-vanity-top{position:absolute;bottom:calc(30% + 56px);left:30%;right:30%;height:8px;background:rgba(255,255,255,.1);border-radius:4px 4px 0 0}
+.sdb-tap{position:absolute;bottom:calc(30% + 64px);left:50%;transform:translateX(-50%);width:2px;height:36px;background:linear-gradient(180deg,rgba(201,169,110,.75) 0%,rgba(201,169,110,.2) 100%)}
+.sdb-vanity{position:absolute;bottom:30%;left:25%;right:25%;height:16px;background:linear-gradient(180deg,#B8B0A8 0%,#A0988E 100%)}
+.sdb-floor{position:absolute;bottom:0;left:-80%;width:260%;height:65%;transform:perspective(700px) rotateX(58deg);transform-origin:bottom center;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0px,rgba(255,255,255,.04) 1px,transparent 1px,transparent 80px),repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0px,rgba(255,255,255,.04) 1px,transparent 1px,transparent 80px),linear-gradient(180deg,#22323C 0%,#182830 100%)}
+
+/* ════════════════════════════
+   SCENE 5 — DRESSING
+════════════════════════════ */
+#s-dressing{background:linear-gradient(180deg,#1A1510 0%,#120E08 100%)}
+.dr-vp-l{position:absolute;inset:0;width:18%;background:linear-gradient(90deg,#0C0A06 0%,#1A1510 100%);clip-path:polygon(0 0,100% 10%,100% 90%,0 100%)}
+.dr-vp-r{position:absolute;top:0;right:0;bottom:0;width:18%;background:linear-gradient(270deg,#0C0A06 0%,#1A1510 100%);clip-path:polygon(0 10%,100% 0,100% 100%,0 90%)}
+.dr-shelves{position:absolute;top:5%;left:18%;right:18%;bottom:31%;display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.dr-col{background:linear-gradient(180deg,#2A2218 0%,#201A10 100%);border:1px solid #362E22;display:grid;grid-template-rows:repeat(4,1fr);gap:3px;padding:3px}
+.dr-cell{background:linear-gradient(180deg,#302618 0%,#281E12 100%)}
+.dr-cell::after{content:'';display:block;height:2px;background:rgba(255,255,255,.045);margin:4px 4px 0}
+.dr-rod{position:absolute;top:29%;left:18%;right:18%;height:1.5px;background:linear-gradient(90deg,transparent,rgba(201,169,110,.5) 15%,rgba(201,169,110,.5) 85%,transparent)}
+.dr-floor{position:absolute;bottom:0;left:-80%;width:260%;height:65%;transform:perspective(700px) rotateX(58deg);transform-origin:bottom center;background:repeating-linear-gradient(90deg,#8C6C3E 0px,#A07C4A 14px,#8C6C3E 28px,#7C5E34 42px,#8C6C3E 56px);background-size:56px 100%}
+
+/* ════════════════════════════
+   SCENE 6 — TERRASSE
+════════════════════════════ */
+#s-terrasse{background:linear-gradient(180deg,#04060C 0%,#08101C 55%,#060A14 100%)}
+.t-sky{position:absolute;top:0;left:0;right:0;height:55%;background:radial-gradient(ellipse at 25% 45%,rgba(35,18,55,.55) 0%,transparent 55%),linear-gradient(180deg,#030508 0%,#08101C 100%)}
+.t-stars{position:absolute;top:0;left:0;right:0;height:58%}
+.t-pergola{position:absolute;top:0;left:0;right:0;height:11%;overflow:hidden}
+.t-slat{position:absolute;top:0;bottom:0;width:7px;background:#0E0A06}
+.t-rail{position:absolute;top:47%;left:0;right:0;height:11%}
+.t-rail-bar{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(201,169,110,.32) 12%,rgba(201,169,110,.32) 88%,transparent)}
+.t-vbar{position:absolute;top:0;bottom:0;width:1px;background:rgba(201,169,110,.18)}
+.t-floor{position:absolute;bottom:0;left:-80%;width:260%;height:68%;transform:perspective(700px) rotateX(58deg);transform-origin:bottom center;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0px,rgba(0,0,0,.18) 2px,transparent 2px,transparent 100px),repeating-linear-gradient(90deg,rgba(0,0,0,.12) 0px,rgba(0,0,0,.12) 2px,transparent 2px,transparent 140px),linear-gradient(135deg,#C4B494 0%,#B6A686 50%,#C0B090 100%)}
+
+/* ════════════════════════════
+   SCENE 7 — PISCINE
+════════════════════════════ */
+#s-piscine{background:linear-gradient(180deg,#020406 0%,#04080E 100%)}
+.p-sky{position:absolute;top:0;left:0;right:0;height:46%;background:radial-gradient(ellipse at 65% 30%,rgba(8,18,50,.7) 0%,transparent 60%),linear-gradient(180deg,#020406 0%,#050A14 100%)}
+.p-stars{position:absolute;top:0;left:0;right:0;height:50%}
+.p-coping{position:absolute;top:46%;left:0;right:0;height:14px;background:linear-gradient(180deg,#CAC2B6 0%,#B6AEA2 100%);box-shadow:0 3px 28px rgba(0,0,0,.8);z-index:2}
+.p-water{position:absolute;top:calc(46% + 14px);left:0;right:0;bottom:20%;overflow:hidden}
+.p-wfill{position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.045) 0%,rgba(255,255,255,.045) 2px,transparent 2px,transparent 28px),linear-gradient(180deg,#1C72B4 0%,#0E4E84 45%,#0A3E6E 100%);animation:wm 7s ease-in-out infinite}
+.p-wfill::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-45deg,rgba(255,255,255,.03) 0%,rgba(255,255,255,.03) 2px,transparent 2px,transparent 28px);animation:wm 10s ease-in-out infinite reverse}
+.p-reflex{position:absolute;top:calc(46% + 14px);left:10%;right:10%;height:100px;background:radial-gradient(ellipse,rgba(255,255,255,.09) 0%,transparent 70%);animation:ref 5s ease-in-out infinite}
+.p-deck{position:absolute;bottom:0;left:0;right:0;height:20%;background:repeating-linear-gradient(0deg,rgba(0,0,0,.2) 0px,rgba(0,0,0,.2) 2px,transparent 2px,transparent 70px),repeating-linear-gradient(90deg,rgba(0,0,0,.15) 0px,rgba(0,0,0,.15) 2px,transparent 2px,transparent 110px),linear-gradient(180deg,#1C1A18 0%,#141210 100%)}
+@keyframes wm{0%,100%{background-position:0 0,0 0}50%{background-position:28px 28px,0 0}}
+@keyframes ref{0%,100%{opacity:.45;transform:scaleX(1)}50%{opacity:.85;transform:scaleX(1.1)}}
+
+/* Hero text on aerial */
+#hero-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:38%;z-index:4;pointer-events:none;text-align:center}
+#hero-txt h1{font-size:clamp(2rem,5vw,3.8rem);font-weight:normal;letter-spacing:.22em;text-transform:uppercase;line-height:.95;text-wrap:balance}
+#hero-txt p{font-family:system-ui,sans-serif;font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;color:var(--or);margin-top:16px}
+
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
-<div id="cr"></div>
-<div id="cd"></div>
+<div id="cr"></div><div id="cd"></div>
 <div id="pb"></div>
 
-<div id="logo">
-  <span id="logo-name">Maison Marcuzzi</span>
-  <span id="logo-sub">Matériaux d'exception</span>
-</div>
-
+<div id="logo"><b>Maison Marcuzzi</b><em>Matériaux d'exception</em></div>
 <div id="ctr"></div>
 
-<div id="ndots">
-  <div class="nd on" data-i="0"></div>
-  <div class="nd" data-i="1"></div>
-  <div class="nd" data-i="2"></div>
-  <div class="nd" data-i="3"></div>
-  <div class="nd" data-i="4"></div>
-  <div class="nd" data-i="5"></div>
-  <div class="nd" data-i="6"></div>
-  <div class="nd" data-i="7"></div>
+<div id="dots">
+  <div class="dot on" data-i="0"></div>
+  <div class="dot" data-i="1"></div>
+  <div class="dot" data-i="2"></div>
+  <div class="dot" data-i="3"></div>
+  <div class="dot" data-i="4"></div>
+  <div class="dot" data-i="5"></div>
+  <div class="dot" data-i="6"></div>
+  <div class="dot" data-i="7"></div>
 </div>
+
+<div id="hint"><p>Faites défiler pour découvrir</p><div class="hl"></div></div>
 
 <div id="info">
   <div id="rname"></div>
@@ -108,81 +217,232 @@ body{background:#060402;font-family:Georgia,'Times New Roman',serif;color:var(--
   </div>
 </div>
 
-<div id="hint">
-  <p>Faites défiler pour découvrir</p>
-  <div class="hl"></div>
-</div>
-
 <div id="track">
  <div id="stage">
 
-  <!-- 0 FAÇADE -->
-  <div class="scene" id="s0">
-    <img class="si" id="ext-img"
-      src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1920&q=85"
-      alt="Villa de luxe">
-    <div class="ov"></div>
-    <div class="hero">
+  <!-- 0 AERIAL -->
+  <div class="scene" id="s-aerial">
+    <canvas id="stars" aria-hidden="true"></canvas>
+    <div id="aerial-perspective">
+      <div id="aerial-content">
+
+        <!-- SVG house top-down -->
+        <svg id="house-svg" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg" width="1000" style="max-width:none;display:block">
+          <defs>
+            <radialGradient id="wg" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#FFD060" stop-opacity=".65"/>
+              <stop offset="100%" stop-color="#FF8020" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="pg" cx="50%" cy="40%" r="55%">
+              <stop offset="0%" stop-color="#40B0FF" stop-opacity=".4"/>
+              <stop offset="100%" stop-color="#0A50A0" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="6" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- Ground -->
+          <rect width="1000" height="700" fill="#080C10"/>
+
+          <!-- Lawn areas (subtle) -->
+          <ellipse cx="180" cy="380" rx="140" ry="90" fill="#091208" opacity=".8"/>
+          <ellipse cx="820" cy="200" rx="120" ry="80" fill="#091208" opacity=".7"/>
+          <ellipse cx="500" cy="650" rx="200" ry="60" fill="#091208" opacity=".6"/>
+
+          <!-- Driveway path -->
+          <polygon points="475,700 525,700 510,560 490,560" fill="#14100C"/>
+          <ellipse cx="500" cy="555" rx="55" ry="12" fill="none" stroke="#1C1814" stroke-width="3" opacity=".7"/>
+
+          <!-- Terrace/outdoor area -->
+          <rect x="255" y="390" width="310" height="90" rx="2" fill="#131008" opacity=".9"/>
+          <rect x="253" y="388" width="314" height="94" rx="3" fill="none" stroke="#2A2418" stroke-width="1.5" opacity=".6"/>
+
+          <!-- Main house footprint -->
+          <rect x="255" y="165" width="310" height="225" rx="2" fill="#1C1812"/>
+          <rect x="253" y="163" width="314" height="229" rx="3" fill="none" stroke="#2E2618" stroke-width="1.5"/>
+
+          <!-- Roof ridge lines -->
+          <line x1="410" y1="165" x2="410" y2="390" stroke="#2A2218" stroke-width="2.5" opacity=".8"/>
+          <line x1="255" y1="277" x2="565" y2="277" stroke="#2A2218" stroke-width="1.5" opacity=".6"/>
+
+          <!-- Chimney -->
+          <rect x="520" y="148" width="24" height="34" rx="1" fill="#14100C"/>
+          <rect x="518" y="144" width="28" height="8" rx="1" fill="#191410"/>
+
+          <!-- Left wing/annex -->
+          <rect x="140" y="210" width="115" height="155" rx="2" fill="#1A1610"/>
+          <rect x="138" y="208" width="119" height="159" rx="3" fill="none" stroke="#2A2018" stroke-width="1.5"/>
+
+          <!-- Window glows — main house -->
+          <rect x="278" y="188" width="72" height="50" fill="url(#wg)" rx="1"/>
+          <rect x="278" y="188" width="72" height="50" fill="#FFD060" opacity=".18" rx="1"/>
+          <rect x="278" y="188" width="72" height="50" fill="none" stroke="#FFD060" stroke-width=".5" opacity=".3" rx="1"/>
+
+          <rect x="455" y="188" width="72" height="50" fill="url(#wg)" rx="1"/>
+          <rect x="455" y="188" width="72" height="50" fill="#FFD060" opacity=".18" rx="1"/>
+
+          <rect x="278" y="308" width="72" height="50" fill="url(#wg)" rx="1" opacity=".7"/>
+          <rect x="455" y="308" width="72" height="50" fill="url(#wg)" rx="1" opacity=".7"/>
+
+          <!-- Left wing windows -->
+          <rect x="158" y="230" width="55" height="40" fill="url(#wg)" rx="1" opacity=".7"/>
+          <rect x="158" y="300" width="55" height="40" fill="url(#wg)" rx="1" opacity=".6"/>
+
+          <!-- Window glow on ground (light spilling) -->
+          <ellipse cx="314" cy="213" rx="50" ry="18" fill="#FFB030" opacity=".07"/>
+          <ellipse cx="491" cy="213" rx="50" ry="18" fill="#FFB030" opacity=".07"/>
+
+          <!-- Front door area -->
+          <rect x="388" y="479" width="44" height="14" fill="#3A2A16" rx="1"/>
+          <line x1="410" y1="480" x2="410" y2="493" stroke="#2A1E10" stroke-width=".5" opacity=".5"/>
+          <!-- Door light spill on terrace -->
+          <ellipse cx="410" cy="512" rx="35" ry="18" fill="#FFD060" opacity=".06"/>
+
+          <!-- Pool -->
+          <rect x="640" y="210" width="190" height="120" rx="10" fill="#1068A8" opacity=".85"/>
+          <rect x="640" y="210" width="190" height="120" rx="10" fill="url(#pg)"/>
+          <rect x="638" y="208" width="194" height="124" rx="11" fill="none" stroke="#4090D0" stroke-width="1" opacity=".3"/>
+          <!-- Pool shimmer -->
+          <line x1="660" y1="250" x2="810" y2="250" stroke="rgba(255,255,255,.08)" stroke-width="1.5"/>
+          <line x1="660" y1="280" x2="810" y2="280" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+          <!-- Pool blue glow on ground -->
+          <ellipse cx="735" cy="340" rx="80" ry="25" fill="#1060A0" opacity=".12"/>
+
+          <!-- Terrace/pool surround -->
+          <rect x="620" y="190" width="232" height="162" rx="4" fill="none" stroke="#C4B494" stroke-width="1.5" opacity=".25"/>
+
+          <!-- Garden path around pool -->
+          <rect x="620" y="356" width="232" height="8" rx="3" fill="#181410" opacity=".7"/>
+
+          <!-- Trees -->
+          <circle cx="165" cy="168" r="42" fill="#071008"/>
+          <circle cx="165" cy="168" r="28" fill="#091410"/>
+          <circle cx="205" cy="135" r="30" fill="#071008"/>
+          <circle cx="205" cy="135" r="20" fill="#081208"/>
+
+          <circle cx="660" cy="150" r="38" fill="#071008"/>
+          <circle cx="660" cy="150" r="24" fill="#091410"/>
+          <circle cx="700" cy="128" r="28" fill="#071008"/>
+
+          <circle cx="750" cy="430" r="35" fill="#071008"/>
+          <circle cx="750" cy="430" r="22" fill="#081208"/>
+
+          <circle cx="110" cy="460" r="40" fill="#071008"/>
+          <circle cx="110" cy="460" r="26" fill="#091410"/>
+
+          <circle cx="580" cy="620" r="32" fill="#071008"/>
+          <circle cx="580" cy="620" r="20" fill="#081208"/>
+          <circle cx="430" cy="630" r="28" fill="#071008"/>
+
+          <!-- Path lights (tiny warm dots along driveway) -->
+          <circle cx="490" cy="570" r="3" fill="#FFD060" opacity=".5" filter="url(#glow)"/>
+          <circle cx="510" cy="570" r="3" fill="#FFD060" opacity=".5" filter="url(#glow)"/>
+          <circle cx="490" cy="600" r="3" fill="#FFD060" opacity=".4"/>
+          <circle cx="510" cy="600" r="3" fill="#FFD060" opacity=".4"/>
+          <circle cx="490" cy="630" r="3" fill="#FFD060" opacity=".3"/>
+          <circle cx="510" cy="630" r="3" fill="#FFD060" opacity=".3"/>
+
+          <!-- MM label subtle -->
+          <text x="410" y="710" font-family="Georgia,serif" font-size="11" fill="rgba(201,169,110,.2)" text-anchor="middle" letter-spacing="8">MAISON MARCUZZI</text>
+        </svg>
+
+      </div>
+    </div>
+
+    <!-- Hero text overlay -->
+    <div id="hero-txt">
       <h1>Maison<br>Marcuzzi</h1>
       <p>Matériaux d'exception</p>
-      <div class="hero-line"></div>
     </div>
   </div>
 
-  <!-- 1 HALL -->
-  <div class="scene" id="s1">
-    <img class="si"
-      src="https://images.unsplash.com/photo-1600210492493-0977e98eb4c0?auto=format&fit=crop&w=1920&q=85"
-      alt="Hall d'entrée">
-    <div class="ov"></div>
+  <!-- 1 HALL D'ENTRÉE -->
+  <div class="scene" id="s-hall">
+    <div class="hall-ceil"></div>
+    <div class="hall-vp-l"></div>
+    <div class="hall-vp-r"></div>
+    <div class="hall-back"></div>
+    <div class="hall-ch-rod"></div>
+    <div class="hall-ch-glow"></div>
+    <div class="hall-arch"></div>
+    <div class="hall-col l"></div><div class="hall-col r"></div>
+    <div class="hall-dado"></div>
+    <div class="hall-door-top"></div>
+    <div class="hall-door"></div>
+    <div class="hall-floor"></div>
   </div>
 
   <!-- 2 SALON -->
-  <div class="scene" id="s2">
-    <img class="si"
-      src="https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?auto=format&fit=crop&w=1920&q=85"
-      alt="Salon">
-    <div class="ov"></div>
+  <div class="scene" id="s-salon">
+    <div class="salon-vp-l"></div>
+    <div class="salon-vp-r"></div>
+    <div class="salon-ceil"></div>
+    <div class="salon-fp-glow"></div>
+    <div class="salon-fp-wrap">
+      <div class="salon-fp"><div class="salon-fp-hole"></div></div>
+    </div>
+    <div class="salon-sofa"></div>
+    <div class="salon-floor"></div>
   </div>
 
   <!-- 3 CUISINE -->
-  <div class="scene" id="s3">
-    <img class="si"
-      src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=1920&q=85"
-      alt="Cuisine">
-    <div class="ov"></div>
+  <div class="scene" id="s-cuisine">
+    <div class="c-vp-l"></div>
+    <div class="c-vp-r"></div>
+    <div class="c-upper">
+      <div class="c-panel"></div><div class="c-panel"></div><div class="c-panel"></div>
+      <div class="c-panel"></div><div class="c-panel"></div>
+    </div>
+    <div class="c-back"></div>
+    <div class="c-cabs"></div>
+    <div class="c-ctr"></div>
+    <div class="c-floor"></div>
   </div>
 
   <!-- 4 SALLE DE BAIN -->
-  <div class="scene" id="s4">
-    <img class="si"
-      src="https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=1920&q=85"
-      alt="Salle de bain">
-    <div class="ov"></div>
+  <div class="scene" id="s-sdb">
+    <div class="sdb-vp-l"></div>
+    <div class="sdb-vp-r"></div>
+    <div class="sdb-top-bar"></div>
+    <div class="sdb-mirror"></div>
+    <div class="sdb-tap"></div>
+    <div class="sdb-vanity-top"></div>
+    <div class="sdb-vanity"></div>
+    <div class="sdb-floor"></div>
   </div>
 
   <!-- 5 DRESSING -->
-  <div class="scene" id="s5">
-    <img class="si"
-      src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1920&q=85"
-      alt="Dressing">
-    <div class="ov"></div>
+  <div class="scene" id="s-dressing">
+    <div class="dr-vp-l"></div>
+    <div class="dr-vp-r"></div>
+    <div class="dr-shelves">
+      <div class="dr-col"><div class="dr-cell"></div><div class="dr-cell"></div><div class="dr-cell"></div><div class="dr-cell"></div></div>
+      <div class="dr-col"><div class="dr-cell"></div><div class="dr-cell"></div><div class="dr-cell"></div><div class="dr-cell"></div></div>
+      <div class="dr-col"><div class="dr-cell"></div><div class="dr-cell"></div><div class="dr-cell"></div><div class="dr-cell"></div></div>
+    </div>
+    <div class="dr-rod"></div>
+    <div class="dr-floor"></div>
   </div>
 
   <!-- 6 TERRASSE -->
-  <div class="scene" id="s6">
-    <img class="si"
-      src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1920&q=85"
-      alt="Terrasse">
-    <div class="ov"></div>
+  <div class="scene" id="s-terrasse">
+    <div class="t-sky"></div>
+    <div class="t-stars" id="t-stars"></div>
+    <div class="t-pergola" id="pergola"></div>
+    <div class="t-rail" id="railing"><div class="t-rail-bar"></div></div>
+    <div class="t-floor"></div>
   </div>
 
   <!-- 7 PISCINE -->
-  <div class="scene" id="s7">
-    <img class="si"
-      src="https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?auto=format&fit=crop&w=1920&q=85"
-      alt="Espace piscine">
-    <div class="ov"></div>
+  <div class="scene" id="s-piscine">
+    <div class="p-sky"></div>
+    <div class="p-stars" id="p-stars"></div>
+    <div class="p-coping"></div>
+    <div class="p-water"><div class="p-wfill"></div></div>
+    <div class="p-reflex"></div>
+    <div class="p-deck"></div>
   </div>
 
  </div>
@@ -191,100 +451,140 @@ body{background:#060402;font-family:Georgia,'Times New Roman',serif;color:var(--
 <script>
 gsap.registerPlugin(ScrollTrigger);
 
+/* ── DATA ── */
 const DATA = [
-  { name:null, mat:null },
-  { name:"Hall d'entrée", mat:'Carrelage marbre' },
-  { name:'Salon',         mat:'Parquet chêne massif' },
-  { name:'Cuisine',       mat:'Pierre & carrelage' },
-  { name:'Salle de bain', mat:'Pierre naturelle' },
-  { name:'Dressing',      mat:'Parquet & menuiserie' },
-  { name:'Terrasse',      mat:'Dallage travertin' },
-  { name:'Espace piscine',mat:'Margelle & carrelage piscine' },
+  {name:null,mat:null},
+  {name:"Hall d'entrée",mat:'Carrelage marbre'},
+  {name:'Salon',mat:'Parquet chêne massif'},
+  {name:'Cuisine',mat:'Pierre & carrelage'},
+  {name:'Salle de bain',mat:'Pierre naturelle'},
+  {name:'Dressing',mat:'Parquet & menuiserie'},
+  {name:'Terrasse',mat:'Dallage travertin'},
+  {name:'Espace piscine',mat:'Margelle & carrelage piscine'},
 ];
+const N = DATA.length;
 
-const N       = DATA.length;
-const scenes  = DATA.map((_,i)=>document.getElementById('s'+i));
-const ndots   = document.querySelectorAll('.nd');
+const IDS = ['s-aerial','s-hall','s-salon','s-cuisine','s-sdb','s-dressing','s-terrasse','s-piscine'];
+const scenes  = IDS.map(id=>document.getElementById(id));
+const ndots   = document.querySelectorAll('.dot');
 const pb      = document.getElementById('pb');
 const track   = document.getElementById('track');
-const extImg  = document.getElementById('ext-img');
 const hint    = document.getElementById('hint');
 const ctr     = document.getElementById('ctr');
 const rname   = document.getElementById('rname');
 const mside   = document.getElementById('mside');
 const mtag    = document.getElementById('mtag');
 const xbtn    = document.getElementById('xbtn');
+const aerialContent = document.getElementById('aerial-content');
+const heroTxt = document.getElementById('hero-txt');
 let cur = -1;
+
+/* ── STARS CANVAS ── */
+function makeStars(canvasId, n) {
+  const c = document.getElementById(canvasId);
+  if(!c) return;
+  c.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none';
+  const resize = () => { c.width = c.offsetWidth; c.height = c.offsetHeight; drawStars(c,n); };
+  const drawStars = (c, n) => {
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0,0,c.width,c.height);
+    for(let i=0;i<n;i++){
+      const x=Math.random()*c.width, y=Math.random()*c.height*.9;
+      const r=Math.random()<.15?1.2:.6;
+      const op=.2+Math.random()*.8;
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${op})`; ctx.fill();
+    }
+  };
+  resize(); window.addEventListener('resize',resize);
+}
+makeStars('stars',140);
+
+/* Static star divs for outdoor scenes */
+function mkStarDivs(el, n) {
+  if(!el) return;
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div');
+    const sz=Math.random()<.15?2:1;
+    Object.assign(s.style,{
+      position:'absolute',width:sz+'px',height:sz+'px',borderRadius:'50%',
+      background:`rgba(255,255,255,${.2+Math.random()*.8})`,
+      left:Math.random()*100+'%',top:Math.random()*90+'%'
+    });
+    el.appendChild(s);
+  }
+}
+mkStarDivs(document.getElementById('t-stars'),80);
+mkStarDivs(document.getElementById('p-stars'),65);
+
+/* ── PERGOLA + RAILING ── */
+const pg = document.getElementById('pergola');
+for(let i=0;i<16;i++){const s=document.createElement('div');s.className='t-slat';s.style.left=(i*6.67)+'%';pg.appendChild(s);}
+const rl = document.getElementById('railing');
+for(let i=0;i<=24;i++){const b=document.createElement('div');b.className='t-vbar';b.style.left=(i*4.17)+'%';rl.appendChild(b);}
 
 /* ── CURSOR ── */
 const cr = document.getElementById('cr');
 const cd = document.getElementById('cd');
-document.addEventListener('mousemove', e => {
-  gsap.to(cd, { x:e.clientX-2.5, y:e.clientY-2.5, duration:.06 });
-  gsap.to(cr, { x:e.clientX-23,  y:e.clientY-23,  duration:.55, ease:'power3.out' });
+document.addEventListener('mousemove', e=>{
+  gsap.to(cd,{x:e.clientX-2.5,y:e.clientY-2.5,duration:.06});
+  gsap.to(cr,{x:e.clientX-23,y:e.clientY-23,duration:.55,ease:'power3.out'});
 });
-document.querySelectorAll('button,.nd').forEach(el=>{
+document.querySelectorAll('button,.dot').forEach(el=>{
   el.addEventListener('mouseenter',()=>gsap.to(cr,{width:62,height:62,duration:.35}));
   el.addEventListener('mouseleave',()=>gsap.to(cr,{width:46,height:46,duration:.35}));
 });
 
-/* ── ACTIVATE SCENE ── */
-function activate(i) {
-  if(i===cur) return;
-  cur=i;
+/* ── ACTIVATE ── */
+function activate(i){
+  if(i===cur)return; cur=i;
   ndots.forEach((d,j)=>d.classList.toggle('on',j===i));
-
   rname.classList.remove('vis');
   mtag.classList.remove('vis');
   xbtn.classList.remove('vis');
   void rname.offsetWidth;
-
-  const d = DATA[i];
+  const d=DATA[i];
   if(d.name){
-    ctr.textContent = String(i).padStart(2,'0')+' / 0'+(N-1);
+    ctr.textContent=String(i).padStart(2,'0')+' / 0'+(N-1);
     ctr.style.opacity='1';
-    rname.textContent = d.name;
-    mtag.textContent  = d.mat;
-    mside.style.display='flex';
-    setTimeout(()=>{ rname.classList.add('vis'); mtag.classList.add('vis'); xbtn.classList.add('vis'); },80);
+    rname.textContent=d.name; mtag.textContent=d.mat; mside.style.display='flex';
+    setTimeout(()=>{rname.classList.add('vis');mtag.classList.add('vis');xbtn.classList.add('vis');},80);
   } else {
-    ctr.style.opacity='0';
-    rname.textContent='';
-    mside.style.display='none';
+    ctr.style.opacity='0'; rname.textContent=''; mside.style.display='none';
   }
 }
 
 /* ── MAIN SCROLL ── */
 ScrollTrigger.create({
   trigger:'#track', start:'top top', end:'bottom bottom',
-  scrub: 1.4,
+  scrub:1.5,
   onUpdate(self){
-    const p = self.progress;
-
-    // Progress bar
+    const p=self.progress;
     gsap.set(pb,{scaleX:p});
+    gsap.set(hint,{opacity:Math.max(0,1-p*16)});
 
-    // Scroll hint fade
-    gsap.set(hint,{opacity: Math.max(0, 1-p*14)});
+    const N2=DATA.length;
+    const sp=p*N2;
+    const idx=Math.min(Math.floor(sp),N2-1);
+    const lp=sp-idx;
 
-    // Scenes crossfade
-    const sp  = p * N;
-    const idx = Math.min(Math.floor(sp), N-1);
-    const lp  = sp - idx;
-
+    /* Crossfade */
     scenes.forEach((s,i)=>{
       let op=0;
-      if(i===idx){
-        op = lp<.07 ? lp/.07 : lp>.9 ? 1-(lp-.9)/.1 : 1;
-      } else if(i===idx+1 && lp>.9){
-        op=(lp-.9)/.1;
-      }
+      if(i===idx){ op=lp<.07?lp/.07:lp>.9?1-(lp-.9)/.1:1; }
+      else if(i===idx+1&&lp>.9){ op=(lp-.9)/.1; }
       gsap.set(s,{opacity:op,force3D:true});
     });
 
-    // Exterior approach zoom (scene 0 only)
+    /* Aerial 3D descent (scene 0, first 12.5% of total scroll) */
     if(idx===0){
-      gsap.set(extImg,{scale:1+lp*1.5,transformOrigin:'center center',force3D:true});
+      /* lp goes 0→1 over the aerial scene */
+      const rx  = 70*(1-lp);            /* 70° aerial → 0° eye level */
+      const sc  = 0.45+lp*2.1;          /* 0.45 → 2.55 (zoom in) */
+      const ty  = lp*80;                 /* slight downward push in view */
+      gsap.set(aerialContent,{rotateX:rx,scale:sc,y:ty,force3D:true});
+      /* Hero text fades out as we approach */
+      gsap.set(heroTxt,{opacity:Math.max(0,1-lp*2.5)});
     }
 
     activate(idx);
@@ -295,17 +595,16 @@ ScrollTrigger.create({
 ndots.forEach((d,i)=>{
   d.addEventListener('click',()=>{
     const max=track.offsetHeight-window.innerHeight;
-    window.scrollTo({top:(i/N)*max+(max/N*.08), behavior:'smooth'});
+    window.scrollTo({top:(i/N)*max+(max/N*.06),behavior:'smooth'});
   });
 });
 
 /* ── EXPLORE ── */
-xbtn.addEventListener('click',()=>{
-  if(DATA[cur]?.mat) alert('Page : '+DATA[cur].mat+'\n(À relier à la vraie catégorie)');
-});
+xbtn.addEventListener('click',()=>{if(DATA[cur]?.mat)alert('→ '+DATA[cur].mat);});
 
 /* ── INIT ── */
 scenes[0].style.opacity='1';
+gsap.set(aerialContent,{rotateX:70,scale:0.45,y:0});
 activate(0);
 </script>
 </body>
