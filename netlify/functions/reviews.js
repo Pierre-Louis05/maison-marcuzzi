@@ -22,80 +22,11 @@ const reponse = (statusCode, corps) => ({
   body: JSON.stringify(corps)
 });
 
-exports.handler = async (event) => {
-  // Diagnostic temporaire : ?diag=1 renvoie la reponse d'erreur complete de
-  // Google. Gardé derriere un parametre pour ne pas exposer les details
-  // internes du projet Google Cloud a tout visiteur. A retirer une fois la
-  // cle retablie.
-  const diag = event && event.queryStringParameters && event.queryStringParameters.diag === '1';
+exports.handler = async () => {
   const API_KEY = process.env.GOOGLE_PLACES_API_KEY;
   if (!API_KEY) return reponse(500, { error: 'Clé API manquante' });
 
-  // ?diag=2 : compare la meme requete avec differents en-tetes d'origine.
-  // Si l'appel passe avec un Referer et echoue sans, la cle porte une
-  // restriction par site web, incompatible avec un appel serveur.
-  if (event && event.queryStringParameters && event.queryStringParameters.diag === '2') {
-    const variantes = [
-      ['sans origine', {}],
-      ['referer site Marcuzzi', { Referer: 'https://resplendent-unicorn-da1705.netlify.app/' }],
-      ['referer site Top', { Referer: 'https://top-carrelage-bailleul.netlify.app/' }],
-      ['referer topamenagement.fr', { Referer: 'https://www.topamenagement.fr/' }]
-    ];
-    const resultats = [];
-    for (const [nom, extra] of variantes) {
-      try {
-        const r = await fetch('https://places.googleapis.com/v1/places:searchText', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Goog-Api-Key': API_KEY,
-            'X-Goog-FieldMask': 'places.id,places.displayName',
-            ...extra
-          },
-          body: JSON.stringify({ textQuery: 'Top Carrelage Bailleul', maxResultCount: 1, languageCode: 'fr' })
-        });
-        const d = await r.json();
-        resultats.push({
-          variante: nom,
-          http: r.status,
-          statut: d.error ? d.error.status : 'OK',
-          message: d.error ? d.error.message : null,
-          lieuTrouve: !!(d.places && d.places.length)
-        });
-      } catch (e) {
-        resultats.push({ variante: nom, erreur: e.message });
-      }
-    }
-    return reponse(200, { diagnostic: 'restriction de cle', resultats });
-  }
 
-  // ?diag=3 : interroge d'autres API Google avec la meme cle. Leurs messages
-  // d'erreur sont bien plus explicites que celui de Places (New) et disent en
-  // clair si le projet n'est pas autorise, si la facturation est coupee, ou si
-  // la cle porte une restriction.
-  if (event && event.queryStringParameters && event.queryStringParameters.diag === '3') {
-    const cibles = [
-      ['Places ancienne version', `https://maps.googleapis.com/maps/api/place/textsearch/json?query=Top+Carrelage+Bailleul&key=${API_KEY}`],
-      ['Geocoding', `https://maps.googleapis.com/maps/api/geocode/json?address=22+Avenue+de+l'Europe+59270+Bailleul&key=${API_KEY}`]
-    ];
-    const resultats = [];
-    for (const [nom, url] of cibles) {
-      try {
-        const r = await fetch(url);
-        const d = await r.json();
-        resultats.push({
-          api: nom,
-          http: r.status,
-          statut: d.status || null,
-          message: d.error_message || null,
-          resultats: Array.isArray(d.results) ? d.results.length : null
-        });
-      } catch (e) {
-        resultats.push({ api: nom, erreur: e.message });
-      }
-    }
-    return reponse(200, { diagnostic: 'autres API avec la meme cle', resultats });
-  }
 
   try {
     let lieu = null;
@@ -128,8 +59,7 @@ exports.handler = async (event) => {
       return reponse(502, {
         error: 'Google a refusé la requête',
         statutGoogle: erreurGoogle.status || null,
-        detail: erreurGoogle.message || null,
-        ...(diag ? { diagnostic: erreurGoogle } : {})
+        detail: erreurGoogle.message || null
       });
     }
     if (!lieu) {
