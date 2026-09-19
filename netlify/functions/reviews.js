@@ -31,6 +31,44 @@ exports.handler = async (event) => {
   const API_KEY = process.env.GOOGLE_PLACES_API_KEY;
   if (!API_KEY) return reponse(500, { error: 'Clé API manquante' });
 
+  // ?diag=2 : compare la meme requete avec differents en-tetes d'origine.
+  // Si l'appel passe avec un Referer et echoue sans, la cle porte une
+  // restriction par site web, incompatible avec un appel serveur.
+  if (event && event.queryStringParameters && event.queryStringParameters.diag === '2') {
+    const variantes = [
+      ['sans origine', {}],
+      ['referer site Marcuzzi', { Referer: 'https://resplendent-unicorn-da1705.netlify.app/' }],
+      ['referer site Top', { Referer: 'https://top-carrelage-bailleul.netlify.app/' }],
+      ['referer topamenagement.fr', { Referer: 'https://www.topamenagement.fr/' }]
+    ];
+    const resultats = [];
+    for (const [nom, extra] of variantes) {
+      try {
+        const r = await fetch('https://places.googleapis.com/v1/places:searchText', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': API_KEY,
+            'X-Goog-FieldMask': 'places.id,places.displayName',
+            ...extra
+          },
+          body: JSON.stringify({ textQuery: 'Top Carrelage Bailleul', maxResultCount: 1, languageCode: 'fr' })
+        });
+        const d = await r.json();
+        resultats.push({
+          variante: nom,
+          http: r.status,
+          statut: d.error ? d.error.status : 'OK',
+          message: d.error ? d.error.message : null,
+          lieuTrouve: !!(d.places && d.places.length)
+        });
+      } catch (e) {
+        resultats.push({ variante: nom, erreur: e.message });
+      }
+    }
+    return reponse(200, { diagnostic: 'restriction de cle', resultats });
+  }
+
   try {
     let lieu = null;
     let erreurGoogle = null;
