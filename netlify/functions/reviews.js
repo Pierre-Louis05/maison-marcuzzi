@@ -22,7 +22,12 @@ const reponse = (statusCode, corps) => ({
   body: JSON.stringify(corps)
 });
 
-exports.handler = async () => {
+exports.handler = async (event) => {
+  // Diagnostic temporaire : ?diag=1 renvoie la reponse d'erreur complete de
+  // Google. Gardé derriere un parametre pour ne pas exposer les details
+  // internes du projet Google Cloud a tout visiteur. A retirer une fois la
+  // cle retablie.
+  const diag = event && event.queryStringParameters && event.queryStringParameters.diag === '1';
   const API_KEY = process.env.GOOGLE_PLACES_API_KEY;
   if (!API_KEY) return reponse(500, { error: 'Clé API manquante' });
 
@@ -57,7 +62,8 @@ exports.handler = async () => {
       return reponse(502, {
         error: 'Google a refusé la requête',
         statutGoogle: erreurGoogle.status || null,
-        detail: erreurGoogle.message || null
+        detail: erreurGoogle.message || null,
+        ...(diag ? { diagnostic: erreurGoogle } : {})
       });
     }
     if (!lieu) {
