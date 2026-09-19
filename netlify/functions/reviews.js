@@ -1,42 +1,70 @@
-exports.handler = async (event, context) => {
-  const API_KEY = process.env.GOOGLE_PLACES_API_KEY;
+// En-têtes renvoyés sur TOUTES les réponses, y compris les erreurs.
+// Sans cela, une erreur arrive au navigateur sans en-tête CORS et s'affiche
+// comme un problème de CORS, ce qui masque complètement la vraie cause.
+const ENTETES = {
+  'Access-Control-Allow-Origin': '*',
+  'Content-Type': 'application/json'
+};
 
-  if (!API_KEY) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Clé API manquante' })
-    };
-  }
+// La fiche Google du magasin s'intitule « Top Carrelage ». Le nom commercial
+// évolue (Top Aménagement), donc on essaie plusieurs libellés, du plus précis
+// au plus large, plutôt que de dépendre d'une seule formulation.
+const REQUETES = [
+  'Top Carrelage, 22 Avenue de l\'Europe, 59270 Bailleul',
+  'Top Carrelage Bailleul',
+  'Top Aménagement Bailleul',
+  'magasin de carrelage 22 Avenue de l\'Europe 59270 Bailleul'
+];
+
+const reponse = (statusCode, corps) => ({
+  statusCode,
+  headers: ENTETES,
+  body: JSON.stringify(corps)
+});
+
+exports.handler = async () => {
+  const API_KEY = process.env.GOOGLE_PLACES_API_KEY;
+  if (!API_KEY) return reponse(500, { error: 'Clé API manquante' });
 
   try {
-    // Étape 1 : Rechercher le lieu par texte
-    const searchRes = await fetch('https://places.googleapis.com/v1/places:searchText', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': API_KEY,
-        'X-Goog-FieldMask': 'places.id,places.displayName,places.rating,places.userRatingCount,places.reviews'
-      },
-      body: JSON.stringify({
-        textQuery: 'Top Carrelage 22 Avenue de l\'Europe Bailleul France',
-        maxResultCount: 1,
-        languageCode: 'fr'
-      })
-    });
+    let lieu = null;
+    let erreurGoogle = null;
 
-    const data = await searchRes.json();
+    for (const textQuery of REQUETES) {
+      const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': API_KEY,
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.rating,places.userRatingCount,places.reviews'
+        },
+        body: JSON.stringify({ textQuery, maxResultCount: 1, languageCode: 'fr' })
+      });
 
-    if (!data.places || data.places.length === 0) {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ error: 'Lieu non trouvé' })
-      };
+      const data = await res.json();
+
+      if (data.error) {            // clé refusée ou API non activée : insister est inutile
+        erreurGoogle = data.error;
+        break;
+      }
+      if (data.places && data.places.length > 0) {
+        lieu = data.places[0];
+        break;
+      }
     }
 
-    const place = data.places[0];
+    if (erreurGoogle) {
+      return reponse(502, {
+        error: 'Google a refusé la requête',
+        statutGoogle: erreurGoogle.status || null,
+        detail: erreurGoogle.message || null
+      });
+    }
+    if (!lieu) {
+      return reponse(404, { error: 'Lieu non trouvé', requetesEssayees: REQUETES.length });
+    }
 
-    // Formater et filtrer uniquement les avis 5 étoiles avec un texte
-    const reviews = (place.reviews || [])
+    const reviews = (lieu.reviews || [])
       .filter(r => r.rating === 5 && r.text?.text && r.text.text.trim().length > 20)
       .map(r => ({
         nom: r.authorAttribution?.displayName || 'Anonyme',
@@ -48,22 +76,15 @@ exports.handler = async (event, context) => {
 
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=3600' // Cache 1h
-      },
+      headers: { ...ENTETES, 'Cache-Control': 'public, max-age=3600' },
       body: JSON.stringify({
-        note: place.rating || 0,
-        totalAvis: place.userRatingCount || 0,
+        note: lieu.rating || 0,
+        totalAvis: lieu.userRatingCount || 0,
         reviews
       })
     };
 
   } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message })
-    };
+    return reponse(500, { error: 'Erreur interne', detail: err.message });
   }
 };
