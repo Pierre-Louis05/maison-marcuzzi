@@ -69,6 +69,34 @@ exports.handler = async (event) => {
     return reponse(200, { diagnostic: 'restriction de cle', resultats });
   }
 
+  // ?diag=3 : interroge d'autres API Google avec la meme cle. Leurs messages
+  // d'erreur sont bien plus explicites que celui de Places (New) et disent en
+  // clair si le projet n'est pas autorise, si la facturation est coupee, ou si
+  // la cle porte une restriction.
+  if (event && event.queryStringParameters && event.queryStringParameters.diag === '3') {
+    const cibles = [
+      ['Places ancienne version', `https://maps.googleapis.com/maps/api/place/textsearch/json?query=Top+Carrelage+Bailleul&key=${API_KEY}`],
+      ['Geocoding', `https://maps.googleapis.com/maps/api/geocode/json?address=22+Avenue+de+l'Europe+59270+Bailleul&key=${API_KEY}`]
+    ];
+    const resultats = [];
+    for (const [nom, url] of cibles) {
+      try {
+        const r = await fetch(url);
+        const d = await r.json();
+        resultats.push({
+          api: nom,
+          http: r.status,
+          statut: d.status || null,
+          message: d.error_message || null,
+          resultats: Array.isArray(d.results) ? d.results.length : null
+        });
+      } catch (e) {
+        resultats.push({ api: nom, erreur: e.message });
+      }
+    }
+    return reponse(200, { diagnostic: 'autres API avec la meme cle', resultats });
+  }
+
   try {
     let lieu = null;
     let erreurGoogle = null;
